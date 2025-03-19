@@ -7,6 +7,7 @@ including:
 * BraTS-GoAT 2024
 * FeTS 2024
 * BraTS 2024
+* BraTS-Lighthouse 2025 🆕
 
 
 Workflows are organized by task type, e.g. the `wf-augmentation` folder contains
@@ -76,6 +77,22 @@ Metrics returned and used for ranking will depend on the task:
 Segmentations | Lesion-wise dice, lesions-wise Hausdorff 95% distance (HD95), full dice, full HD95, sensitivity, specificity | Lesion-wise dice, lesion-wise HD95
 Inpainting | Structural similarity index measure (SSIM), peak-signal-to-noise-ratio (PSNR), mean-square-error (MSE) | All 3 metrics
 Augmentations | Full dice, full HD95, sensitivity, specificity | Dice mean, Dice GINI index, HD95 mean, HD95 GINI index
+Pathology | Matthews correlation coefficient (MCC), F1, sensitivity, specificity | All 4 metrics
+
+---
+
+</details>
+
+
+<details><summary><strong>BraTS-Lighthouse 2025</strong></summary>
+<br/>
+
+Metrics returned and used for ranking will depend on the task:
+
+**Task** | **Metrics** | **Ranking**
+--|--|--
+Segmentations | _Under discussion_ | _Under discussion_
+Inpainting | Structural similarity index measure (SSIM), peak-signal-to-noise-ratio (PSNR), mean-square-error (MSE) | All 3 metrics
 Pathology | Matthews correlation coefficient (MCC), F1, sensitivity, specificity | All 4 metrics
 
 ---
