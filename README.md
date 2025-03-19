@@ -1,6 +1,4 @@
-## BraTS 2023
-
-Branch: `brats2023`
+## BraTS 2023 Evaluation Workflows
 
 BraTS 2023 is split into two evaluation phases:
 
