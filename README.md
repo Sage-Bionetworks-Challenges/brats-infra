@@ -1,4 +1,4 @@
-## BraTS-GoAT 2024
+## BraTS-GoAT 2024 Evaluation Workflows
 
 Similar to BraTS 2023, BraTS-GoAT 2024 is split into two evaluation phases:
 
