@@ -1,6 +1,4 @@
-## FeTS 2024
-
-Branch: `fets2024`
+## FeTS 2024 Evaluation Workflows
 
 FeTS 2024 has one evaluation phase facilitated by this repo:
 
