@@ -1,7 +1,5 @@
 ## BraTS-GoAT 2024
 
-Branch: `brats_goat2024`
-
 Similar to BraTS 2023, BraTS-GoAT 2024 is split into two evaluation phases:
 
 * **Validation phase:** participants submit <u>segmentation predictions</u> to be evaluated using the validation dataset
