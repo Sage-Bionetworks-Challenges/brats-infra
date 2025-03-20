@@ -63,7 +63,7 @@ steps:
       - id: results
 
   get_task_entities:
-    doc: Get goldstandard and label based on task number
+    doc: Get groundtruth and label based on task number
     run: steps/get_task.cwl
     in:
       - id: queue
@@ -72,8 +72,8 @@ steps:
       - id: synid
       - id: label
 
-  download_goldstandard:
-    doc: Download goldstandard
+  download_groundtruth:
+    doc: Download groundtruth
     run: |-
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
@@ -90,8 +90,8 @@ steps:
     in:
       - id: input_file
         source: "#download_submission/filepath"
-      - id: goldstandard
-        source: "#download_goldstandard/filepath"
+      - id: groundtruth
+        source: "#download_groundtruth/filepath"
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern
@@ -170,8 +170,8 @@ steps:
         source: "#synapseConfig"
       - id: input_file
         source: "#download_submission/filepath"
-      - id: goldstandard
-        source: "#download_goldstandard/filepath"
+      - id: groundtruth
+        source: "#download_groundtruth/filepath"
       - id: label
         source: "#get_task_entities/label"
       - id: check_validation_finished

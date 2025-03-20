@@ -13,7 +13,7 @@ inputs:
   type: File
 - id: input_file
   type: File
-- id: goldstandard
+- id: groundtruth
   type: File
 - id: label
   type: string
@@ -41,7 +41,7 @@ arguments:
 - prefix: -p
   valueFrom: $(inputs.input_file.path)
 - prefix: -g
-  valueFrom: $(inputs.goldstandard.path)
+  valueFrom: $(inputs.groundtruth.path)
 - prefix: -l
   valueFrom: $(inputs.label)
 - prefix: -o

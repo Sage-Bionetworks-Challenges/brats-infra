@@ -9,7 +9,7 @@ requirements:
 inputs:
 - id: input_file
   type: File
-- id: goldstandard
+- id: groundtruth
   type: File
 - id: entity_type
   type: string
@@ -43,7 +43,7 @@ arguments:
 - prefix: -p
   valueFrom: $(inputs.input_file)
 - prefix: -g
-  valueFrom: $(inputs.goldstandard.path)
+  valueFrom: $(inputs.groundtruth.path)
 - prefix: -e
   valueFrom: $(inputs.entity_type)
 - prefix: -o
