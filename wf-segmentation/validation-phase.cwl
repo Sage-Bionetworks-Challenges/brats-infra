@@ -184,7 +184,7 @@ steps:
     doc: >
       Send email of the scores to the submitter, as well as the link to the
       all_scores CSV file on Synapse
-    run: ../shared/email_results.cwl
+    run: steps/email_results.cwl
     in:
       - id: submissionid
         source: "#submissionId"
