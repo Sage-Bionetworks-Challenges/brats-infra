@@ -42,9 +42,9 @@ def _check_header(img, label):
     error = ""
     match label:
         case "BraTS-GLI":
-            if img.header.get_data_shape() != DIM_GLI_POSTOP:
-                error = ("One or more predictions is not a NIfTI file with "
-                         "dimension of 182x218x182.")
+            if img.header.get_data_shape() not in [DIM, DIM_GLI_POSTOP]:
+                error = ("One or more predictions has incorrect dimensions: "
+                         f"{img.header.get_data_shape()}")
         case "BraTS-MEN-RT":
             # MEN-RT doesn't have a set dimension and origin for all scans,
             # so don't perform any checks.
