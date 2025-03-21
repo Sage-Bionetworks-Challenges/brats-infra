@@ -22,63 +22,63 @@ expression: |2-
     // BraTS-GLI 2023
     if (inputs.queue == "9615768") {
       return {
-        synid: "syn51514102",
+        synid: "syn51514101",
         label: "BraTS-GLI"
       };
     } 
     // BraTS-GLI 2024
     else if (inputs.queue == "9615769") {
       return {
-        synid: "syn61790732",
+        synid: "syn61935872",
         label: "BraTS-GLI"
       };
     } 
     // BraTS-MEN 2023
     else if (inputs.queue == "9615770") {
       return {
-        synid: "syn51930262",
+        synid: "syn65660708",
         label: "BraTS-MEN"
       };
     } 
     // BraTS-MEN-RT 2024
     else if (inputs.queue == "9615771") {
       return {
-        synid: "syn61484747",
+        synid: "syn65660737",
         label: "BraTS-MEN-RT"
       };
     }
     // BraTS-MET 2023 
     else if (inputs.queue == "9615776") {
       return {
-        synid: "syn52237053",
+        synid: "syn65660725",
         label: "BraTS-MET"
       };
     } 
     // BraTS-PED 2023
     else if (inputs.queue == "9615772") {
       return {
-        synid: "syn51929881",
+        synid: "syn65660726",
         label: "BraTS-PED"
       };
     } 
     // BraTS-PED 2024
     else if (inputs.queue == "9615773") {
       return {
-        synid: "syn60969497",
+        synid: "syn61792318",
         label: "BraTS-PED"
       };
     }
     // BraTS-SSA 2023
     else if (inputs.queue == "9615774") {
       return {
-        synid: "syn52045897",
+        synid: "syn65660729",
         label: "BraTS-SSA"
       };
     }
     // BraTS-SSA 2024
     else if (inputs.queue == "9615775") {
       return {
-        synid: "syn61612353",
+        synid: "syn65660734",
         label: "BraTS-SSA"
       };
     } else {
