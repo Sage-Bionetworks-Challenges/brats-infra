@@ -17,6 +17,7 @@ import pandas as pd
 
 import synapseclient
 import utils
+import metrics
 import metrics_GLI
 import metrics_MEN_RT
 import metrics_MET
@@ -49,6 +50,10 @@ def calculate_per_lesion(parent, pred, scan_id, label):
     match label:
         case "BraTS-GLI":
             return metrics_GLI.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-MEN":
+            return metrics.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-MEN-RT":
