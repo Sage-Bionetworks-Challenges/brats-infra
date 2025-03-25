@@ -119,7 +119,7 @@ def score(parent, pred_lst, label):
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"(\d{4,5}-\d{1,3})\.nii\.gz$", pred).group(1)
-        results, _ = calculate_per_lesion(parent, pred, scan_id, label)
+        results, *_ = calculate_per_lesion(parent, pred, scan_id, label)
         scan_scores = extract_metrics(results, label, scan_id)
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
