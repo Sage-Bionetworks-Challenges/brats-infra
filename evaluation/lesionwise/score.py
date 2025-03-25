@@ -49,31 +49,32 @@ def calculate_per_lesion(parent, pred, scan_id, label):
     gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
     match label:
         case "BraTS-GLI":
-            return metrics_GLI.get_LesionWiseResults(
+            results, _ = metrics_GLI.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-MEN":
-            return metrics.get_LesionWiseResults(
+            results = metrics.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-MEN-RT":
             # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
             gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
-            return metrics_MEN_RT.get_LesionWiseResults(
+            results, _ = metrics_MEN_RT.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-MET":
-            return metrics_MET.get_LesionWiseResults(
+            results, _ = metrics_MET.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-PED":
-            return metrics_PED.get_LesionWiseResults(
+            results, _ = metrics_PED.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
         case "BraTS-SSA":
-            return metrics_SSA.get_LesionWiseResults(
+            results, _ = metrics_SSA.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
+    return results
 
 
 def extract_metrics(df, label, scan_id):
@@ -119,7 +120,7 @@ def score(parent, pred_lst, label):
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"(\d{4,5}-\d{1,3})\.nii\.gz$", pred).group(1)
-        results, *_ = calculate_per_lesion(parent, pred, scan_id, label)
+        results = calculate_per_lesion(parent, pred, scan_id, label)
         scan_scores = extract_metrics(results, label, scan_id)
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
