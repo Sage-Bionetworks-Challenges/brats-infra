@@ -8,83 +8,73 @@ Run lesion-wise computation and return:
   - Specificity
   - Number of TP, FP, FN
 """
-import argparse
-import json
 import os
 import re
+import argparse
+import json
 
-import metrics
-# import metrics_GLI
-# import metrics_MEN_RT
-# import metrics_MET
-# import metrics_PED
-# import metrics_SSA
 import pandas as pd
+
 import synapseclient
 import utils
+import metrics
+import metrics_GLI
+import metrics_MEN_RT
+import metrics_MET
+import metrics_PED
+import metrics_SSA
 
 
 def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--parent_id", type=str, required=True)
-    parser.add_argument("-s", "--synapse_config", type=str, default="/.synapseConfig")
-    parser.add_argument(
-        "-p", "--predictions_file", type=str, default="/predictions.zip"
-    )
-    parser.add_argument(
-        "-g", "--goldstandard_file", type=str, default="/goldstandard.zip"
-    )
+    parser.add_argument("-s", "--synapse_config",
+                        type=str, default="/.synapseConfig")
+    parser.add_argument("-p", "--predictions_file",
+                        type=str, default="/predictions.zip")
+    parser.add_argument("-g", "--goldstandard_file",
+                        type=str, default="/goldstandard.zip")
     parser.add_argument("-o", "--output", type=str, default="results.json")
     parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
     return parser.parse_args()
 
 
-# def calculate_per_lesion(parent, pred, scan_id, label):
-#     """
-#     Run per-lesionwise computation of prediction scan against
-#     goldstandard.
-#     """
-#     # Default goldstandard file format.
-#     gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
-#     match label:
-#         case "BraTS-GLI":
-#             results, _ = metrics_GLI.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#         case "BraTS-MEN":
-#             results = metrics.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#         case "BraTS-MEN-RT":
-#             # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
-#             gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
-#             results, _ = metrics_MEN_RT.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#         case "BraTS-MET":
-#             results, _ = metrics_MET.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#         case "BraTS-PED":
-#             results, _ = metrics_PED.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#         case "BraTS-SSA":
-#             results, _ = metrics_SSA.get_LesionWiseResults(
-#                 pred_file=pred, gt_file=gold, challenge_name=label
-#             )
-#     return results
-
-
-def calculate_per_lesion(pred, gold, label):
+def calculate_per_lesion(parent, pred, scan_id, label):
     """
     Run per-lesionwise computation of prediction scan against
     goldstandard.
     """
-    return metrics.get_LesionWiseResults(
-        pred_file=pred, gt_file=gold, challenge_name=label
-    )
+    # Default goldstandard file format.
+    gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
+    match label:
+        case "BraTS-GLI":
+            results, _ = metrics_GLI.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-MEN":
+            results = metrics.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-MEN-RT":
+            # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
+            gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
+            results, _ = metrics_MEN_RT.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-MET":
+            results, _ = metrics_MET.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-PED":
+            results, _ = metrics_PED.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+        case "BraTS-SSA":
+            results, _ = metrics_SSA.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
+    return results
 
 
 def extract_metrics(df, label, scan_id):
@@ -101,7 +91,9 @@ def extract_metrics(df, label, scan_id):
         "Num_FP",
         "Num_FN",
     ]
-    tissues = ["ET", "WT", "TC", "NETC", "SNFH", "RC", "CC", "ED", "GTV"]
+    tissues = ["ET", "WT", "TC",
+               "NETC", "SNFH", "RC",
+               "CC", "ED", "GTV"]
 
     res = (
         df.set_index("Labels")
@@ -128,9 +120,7 @@ def score(parent, pred_lst, label):
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"(\d{4,5}-\d{1,3})\.nii\.gz$", pred).group(1)
-        # results = calculate_per_lesion(parent, pred, scan_id, label)
-        gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
-        results = calculate_per_lesion(pred, gold, label)
+        results = calculate_per_lesion(parent, pred, scan_id, label)
         scan_scores = extract_metrics(results, label, scan_id)
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
