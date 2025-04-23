@@ -19,32 +19,48 @@ outputs:
 expression: |2-
 
   ${
-    if (inputs.queue == "9615542") {
+    // BraTS-GLI (Pre)
+    if (inputs.queue == "9615898") {
       return {
-        synid: "syn61790732",
+        synid: "syn64912121",
         label: "BraTS-GLI"
       };
-    } else if (inputs.queue == "9615545") {
+    } 
+    // BraTS-MEN
+    else if (inputs.queue == "9615899") {
       return {
-        synid: "syn61453486",
-        label: "BraTS-MET"
+        synid: "syn51930262",
+        label: "BraTS-MEN"
       };
-    } else if (inputs.queue == "9615543") {
-      return {
-        synid: "syn61612353",
-        label: "BraTS-SSA"
-      };
-    } else if (inputs.queue == "9615544") {
+    } 
+    // BraTS-MEN-RT
+    else if (inputs.queue == "9615900") {
       return {
         synid: "syn61484747",
         label: "BraTS-MEN-RT"
       };
-    } else if (inputs.queue == "9615546") {
+    } 
+    // BraTS-MET
+    else if (inputs.queue == "9615901") {
+      return {
+        synid: "syn64915944",
+        label: "BraTS-MET"
+      };
+    } 
+    // BraTS-SSA
+    else if (inputs.queue == "9615902") {
+      return {
+        synid: "syn61612353",
+        label: "BraTS-SSA"
+      };
+    } 
+    else if (inputs.queue == "9615903") {
       return {
         synid: "syn60969497",
         label: "BraTS-PED"
-      };
-    } else {
+      }
+    }
+    else {
       throw 'invalid queue';
     }
   }
