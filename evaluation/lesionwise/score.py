@@ -18,6 +18,7 @@ import pandas as pd
 import synapseclient
 import utils
 import metrics_GLI
+import metrics_MEN
 import metrics_MEN_RT
 import metrics_MET
 import metrics_PED
@@ -51,6 +52,10 @@ def calculate_per_lesion(parent, pred, scan_id, label):
             return metrics_GLI.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=label
             )
+        case "BraTS-MEN":
+            return metrics_MEN.get_LesionWiseResults(
+                pred_file=pred, gt_file=gold, challenge_name=label
+            )
         case "BraTS-MEN-RT":
             # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
             gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
@@ -76,8 +81,12 @@ def extract_metrics(df, label, scan_id):
     select_cols = [
         "Labels",
         "LesionWise_Score_Dice",
+        "LesionWise_Score_NSD @ 0.5",
+        "LesionWise_Score_NSD @ 1.0",
         "LesionWise_Score_HD95",
         "Legacy_Dice",
+        "Legacy NSD @ 0.5",
+        "Legacy NSD @ 1.0",
         "Legacy_HD95",
         "Sensitivity",
         "Specificity",
@@ -87,7 +96,7 @@ def extract_metrics(df, label, scan_id):
     ]
     tissues = ["ET", "WT", "TC",
                "NETC", "SNFH", "RC",
-               "CC", "ED", "GTV"]
+               "CC", "ED", "GTV",]
 
     res = (
         df.set_index("Labels")
