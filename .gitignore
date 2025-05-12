@@ -15,5 +15,5 @@ tests/
 *.json
 *tar*
 *zip
-all_scores.csv
+*.csv
 inputs.yml
