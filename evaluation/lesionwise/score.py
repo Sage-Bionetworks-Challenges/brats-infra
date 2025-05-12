@@ -102,7 +102,7 @@ def extract_metrics(df, label, scan_id):
         df.set_index("Labels")
         .filter(items=select_cols)
         .filter(items=tissues, axis=0)
-        .reset_index()
+        .reset_index(names=["Labels"])
         .assign(scan_id=f"{label}-{scan_id}")
         .pivot(index="scan_id", columns="Labels")
         .rename(
@@ -114,7 +114,7 @@ def extract_metrics(df, label, scan_id):
             }
         )
     )
-    res.columns = ["_".join(col).strip() for col in res.columns]
+    res.columns = ["_".join(col).strip().replace(" @ ", "_") for col in res.columns]
     return res
 
 
