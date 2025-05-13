@@ -111,10 +111,14 @@ def extract_metrics(df, label, scan_id):
                 "LesionWise_Score_HD95": "LesionWise_Hausdorff95",
                 "Legacy_Dice": "Dice",
                 "Legacy_HD95": "Hausdorff95",
+                "LesionWise_Score_NSD @ 0.5": "LesionWise_NSD_0.5",
+                "LesionWise_Score_NSD @ 1.0": "LesionWise_NSD_1.0",
+                "Legacy NSD @ 0.5": "NSD_0.5",
+                "Legacy NSD @ 1.0": "NSD_1.0",
             }
         )
     )
-    res.columns = ["_".join(col).strip().replace(" @ ", "_") for col in res.columns]
+    res.columns = ["_".join(col).strip() for col in res.columns]
     return res
 
 
