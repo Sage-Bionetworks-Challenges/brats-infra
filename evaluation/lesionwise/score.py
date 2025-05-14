@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Scoring script for Tasks 1-5.
+"""Scoring script for Tasks 1-7 (segmentation).
 
 Run lesion-wise computation and return:
-  - Dice (legacy and lesion-wise)
-  - Hausdorff95 (legacy and lesion-wise)
+  - Dice (full & lesionwise)
+  - Normalized surface distance (full & lesionwise)
+  - Hausdorff95 (full & lesionwise)
   - Sensitivity
   - Specificity
   - Number of TP, FP, FN
@@ -37,42 +38,57 @@ def get_args():
                         type=str, default="/goldstandard.zip")
     parser.add_argument("-o", "--output", type=str, default="results.json")
     parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
+    parser.add_argument("-m", "--mapping_file",
+                        type=str, default="/MappingValidation.csv")
     return parser.parse_args()
 
 
-def calculate_per_lesion(parent, pred, scan_id, label):
+def get_label_mapping(f, key_col, value_col):
+    """Map new filenames to their original cohort label."""
+    try:
+        return (
+            pd.read_csv(f, usecols=[key_col, value_col])
+            .set_index(key_col)
+            .to_dict()
+            .get(value_col)
+        )
+    except FileNotFoundError:
+        return {}
+
+
+def calculate_per_lesion(parent, pred, scan_id, cohort, label):
     """
     Run per-lesionwise computation of prediction scan against
     goldstandard.
     """
     # Default goldstandard file format.
     gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
-    match label:
+    match cohort:
         case "BraTS-GLI":
             return metrics_GLI.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
         case "BraTS-MEN":
             return metrics_MEN.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
         case "BraTS-MEN-RT":
             # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
             gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
             return metrics_MEN_RT.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
         case "BraTS-MET":
             return metrics_MET.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
         case "BraTS-PED":
             return metrics_PED.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
         case "BraTS-SSA":
             return metrics_SSA.get_LesionWiseResults(
-                pred_file=pred, gt_file=gold, challenge_name=label
+                pred_file=pred, gt_file=gold, challenge_name=cohort
             )
 
 
@@ -122,12 +138,16 @@ def extract_metrics(df, label, scan_id):
     return res
 
 
-def score(parent, pred_lst, label):
+def score(parent, pred_lst, label, mapping=None):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
-        scan_id = re.search(r"(\d{4,5}-\d{1,3})\.nii\.gz$", pred).group(1)
-        results, _ = calculate_per_lesion(parent, pred, scan_id, label)
+        scan_id = re.search(r"(\d{4,5}(-\d{1,3})?)\.nii\.gz$", pred).group(1)
+        if mapping and label == "BraTS-GoAT":
+            cohort = f"BraTS-{mapping.get('BraTS-GoAT-' + scan_id)}"
+        else:
+            cohort = label
+        results, _ = calculate_per_lesion(parent, pred, scan_id, cohort, label)
         scan_scores = extract_metrics(results, label, scan_id)
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
@@ -138,9 +158,10 @@ def main():
     args = get_args()
     preds = utils.inspect_zip(args.predictions_file)
     golds = utils.inspect_zip(args.goldstandard_file)
+    mapping = get_label_mapping(args.mapping_file, key_col="NewID", value_col="Cohort")
 
     dir_name = os.path.split(golds[0])[0]
-    results = score(dir_name, preds, args.label)
+    results = score(dir_name, preds, args.label, mapping)
 
     # Get number of segmentations predicted by participant, as well as
     # descriptive statistics for results.
