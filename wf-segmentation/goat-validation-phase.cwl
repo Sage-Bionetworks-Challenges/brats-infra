@@ -26,6 +26,10 @@ inputs:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
+  cohortLabel:
+    label: Label for the segmentation task cohort
+    type: string
+    default: "BraTS-GoAT"
 
 outputs: []
 
@@ -100,6 +104,8 @@ steps:
         default: "(\\d{5})"
       - id: gold_pattern
         default: "(\\d{5})-seg"
+      - id: label
+        source: "#cohortLabel"
     out:
       - id: results
       - id: status
@@ -175,7 +181,7 @@ steps:
       - id: mapping_file
         source: "#download_mapping_file/filepath"
       - id: label
-        default: "BraTS-GoAT"
+        source: "#cohortLabel"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:
