@@ -88,7 +88,7 @@ steps:
 
   validate:
     doc: Validate submission, which should be a tar/zip of NIfTI files
-    run: steps/goat-validate.cwl
+    run: steps/validate.cwl
     in:
       - id: input_file
         source: "#download_submission/filepath"
@@ -174,6 +174,8 @@ steps:
         source: "#download_goldstandard/filepath"
       - id: mapping_file
         source: "#download_mapping_file/filepath"
+      - id: label
+        default: "BraTS-GoAT"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:
@@ -223,7 +225,7 @@ s:author:
   s:email: verena.chung@sagebase.org
   s:name: Verena Chung
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats2023
+s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:

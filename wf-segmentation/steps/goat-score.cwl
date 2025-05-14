@@ -15,8 +15,10 @@ inputs:
   type: File
 - id: goldstandard
   type: File
+- id: label
+  type: string
 - id: mapping_file
-  type: File
+  type: File?
 - id: check_validation_finished
   type: boolean?
 
@@ -42,14 +44,16 @@ arguments:
   valueFrom: $(inputs.input_file.path)
 - prefix: -g
   valueFrom: $(inputs.goldstandard.path)
+- prefix: -l
+  valueFrom: $(inputs.label)
 - prefix: -m
-  valueFrom: $(inputs.mapping_file)
+  valueFrom: $(inputs.mapping_file.path)
 - prefix: -o
   valueFrom: results.json
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/lesionwise-evaluation:goat2024-v1.0.0
+    dockerPull: docker.synapse.org/syn53708126/lesionwise-evaluation:2025-v1.1.0
 
 s:author:
 - class: s:Person
@@ -57,7 +61,7 @@ s:author:
   s:email: verena.chung@sagebase.org
   s:name: Verena Chung
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats2023
+s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:
