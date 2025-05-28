@@ -14,15 +14,18 @@ inputs:
 outputs:
 - id: synid
   type: string
+- id: synid2
+  type: string?
 - id: label
   type: string
 expression: |2-
 
   ${
-    // BraTS-GLI (Pre)
+    // BraTS-GLI
     if (inputs.queue == "9615898") {
       return {
-        synid: "syn64912121",
+        synid: "syn64912121",  // Pre GT
+        synid2: "syn61790732"  // Post GT
         label: "BraTS-GLI"
       };
     } 
@@ -30,6 +33,7 @@ expression: |2-
     else if (inputs.queue == "9615899") {
       return {
         synid: "syn51930262",
+        synid2: "",
         label: "BraTS-MEN"
       };
     } 
@@ -37,6 +41,7 @@ expression: |2-
     else if (inputs.queue == "9615900") {
       return {
         synid: "syn61484747",
+        synid2: "",
         label: "BraTS-MEN-RT"
       };
     } 
@@ -44,6 +49,7 @@ expression: |2-
     else if (inputs.queue == "9615901") {
       return {
         synid: "syn64915944",
+        synid2: "",
         label: "BraTS-MET"
       };
     } 
@@ -51,12 +57,15 @@ expression: |2-
     else if (inputs.queue == "9615902") {
       return {
         synid: "syn61612353",
+        synid2: "",
         label: "BraTS-SSA"
       };
     } 
+    // BraTS-PED
     else if (inputs.queue == "9615903") {
       return {
         synid: "syn60969497",
+        synid2: "",
         label: "BraTS-PED"
       }
     }

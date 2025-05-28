@@ -1,5 +1,5 @@
 #!/usr/bin/env cwl-runner
-cwlVersion: v1.0
+cwlVersion: v1.2
 class: Workflow
 label: BraTS 2025 - Tasks 1-6 workflow
 
@@ -70,6 +70,7 @@ steps:
         source: "#download_submission/evaluation_id"
     out:
       - id: synid
+      - id: synid2
       - id: label
 
   download_goldstandard:
@@ -79,6 +80,19 @@ steps:
     in:
       - id: synapseid
         source: "#get_task_entities/synid"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out:
+      - id: filepath
+
+  download_second_goldstandard:
+    doc: Download (optional) second goldstandard
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
+    when: $(get_task_entities.synid2 != "")
+    in:
+      - id: synapseid
+        source: "#get_task_entities/synid2"
       - id: synapse_config
         source: "#synapseConfig"
     out:
