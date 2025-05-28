@@ -1,5 +1,5 @@
 #!/usr/bin/env cwl-runner
-cwlVersion: v1.2
+cwlVersion: v1.2.0-dev2
 class: Workflow
 label: BraTS 2025 - Tasks 1-6 workflow
 
