@@ -187,6 +187,8 @@ steps:
         source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
+      - id: second_goldstandard
+        source: "#download_second_goldstandard/filepath"
       - id: label
         source: "#get_task_entities/label"
       - id: check_validation_finished
