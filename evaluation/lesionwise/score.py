@@ -173,7 +173,7 @@ def upload_results(parent, results, label):
     # to have all metrics in a single file.
     if label == "BraTS-MEN-RT":
         results.to_csv("all_scores.csv")
-        csv_full_id = ""
+        csv_full_id = None
     else:
         results.to_csv(
             "all_scores.csv",
@@ -238,10 +238,9 @@ def main(args):
             **results.loc["mean"],
             "cases_evaluated": cases_evaluated,
             "submission_scores": csv_id,
+            "submission_scores_legacy": csv_full_id,
             "submission_status": "SCORED",
         }
-        if args.label != "BraTS-MEN-RT":
-            res_dict["submission_scores_legacy"] = csv_full_id
         res_dict = {k: v for k, v in res_dict.items() if not pd.isna(v)}
 
     with open(args.output, "w") as out:
