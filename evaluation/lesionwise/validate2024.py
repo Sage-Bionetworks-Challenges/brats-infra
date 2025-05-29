@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validation script for BraTS 2023.
+"""Validation script for BraTS 2025.
 
 Predictions file must be a tarball or zipped archive of NIfTI files
 (*.nii.gz). Each NIfTI file must have an ID in its filename.
@@ -31,9 +31,9 @@ def get_args():
                         type=str, default="tmpdir")
     parser.add_argument("-o", "--output", type=str)
     parser.add_argument("--pred_pattern", type=str,
-                        default="(\d{5}-\d{3})")
+                        default="(\\d{5}-\\d{3})")
     parser.add_argument("--gold_pattern", type=str,
-                        default="(\d{5}-\d{3})-seg")
+                        default="(\\d{5}-\\d{3})-seg")
     parser.add_argument("-l", "--label",
                         type=str, default="BraTS-GLI")
     return parser.parse_args()
@@ -78,7 +78,11 @@ def validate_file_format(preds, parent, label):
     error = []
     if all(pred.endswith(".nii.gz") for pred in preds):
         # Ensure that all file contents are NIfTI with correct params.
-        if not all((res := check_file_contents(pred, parent, label)) == "" for pred in preds):
+        if not all(
+            (res := check_file_contents(pred, parent, label)) == ""
+            for pred
+            in preds
+        ):
             error = [res]
     else:
         error = ["Not all files in the archive are NIfTI files (*.nii.gz)."]
@@ -107,8 +111,7 @@ def validate_filenames(preds, golds, pred_pattern, gold_pattern):
         }
         unknown_ids = set(scan_ids) - gold_case_ids
         if unknown_ids:
-            error.append(
-                f"Unknown scan IDs found: {', '.join(sorted(unknown_ids))}")
+            error.append(f"Unknown scan IDs found: {', '.join(sorted(unknown_ids))}")
     except AttributeError:
         error = [("Not all filenames in the archive follow the expected "
                   "naming format. Please check the Submission Tutorial "
@@ -123,9 +126,7 @@ def main():
 
     entity_type = args.entity_type.split(".")[-1]
     if entity_type != "FileEntity":
-        invalid_reasons.append(
-            f"Submission must be a File, not {entity_type}."
-        )
+        invalid_reasons.append(f"Submission must be a File, not {entity_type}.")
     else:
         preds = utils.inspect_zip(args.predictions_file, path=args.tmp_dir)
         golds = utils.inspect_zip(args.goldstandard_file, unzip=False)
@@ -134,13 +135,12 @@ def main():
                 utils.inspect_zip(args.second_goldstandard_file, unzip=False)
             )
         if preds:
-            invalid_reasons.extend(validate_file_format(
-                preds, args.tmp_dir, args.label
-            ))
-            invalid_reasons.extend(validate_filenames(
-                preds, golds,
-                args.pred_pattern, args.gold_pattern
-            ))
+            invalid_reasons.extend(
+                validate_file_format(preds, args.tmp_dir, args.label)
+            )
+            invalid_reasons.extend(
+                validate_filenames(preds, golds, args.pred_pattern, args.gold_pattern)
+            )
         else:
             invalid_reasons.append(
                 "Submission must be a tarball or zipped archive "
