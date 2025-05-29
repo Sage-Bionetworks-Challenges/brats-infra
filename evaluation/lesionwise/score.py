@@ -9,21 +9,20 @@ Run lesion-wise computation and return:
   - Specificity
   - Number of TP, FP, FN
 """
-import os
-import re
 import argparse
 import json
+import os
+import re
 
-import pandas as pd
-
-import synapseclient
-import utils
 import metrics_GLI
 import metrics_MEN
 import metrics_MEN_RT
 import metrics_MET
 import metrics_PED
 import metrics_SSA
+import pandas as pd
+import synapseclient
+import utils
 
 PRED_PARENT_DIR = "pred"
 GT_PARENT_DIR = "gt"
@@ -115,9 +114,17 @@ def extract_metrics(df, label, scan_id):
         "Num_FP",
         "Num_FN",
     ]
-    tissues = ["ET", "WT", "TC",
-               "NETC", "SNFH", "RC",
-               "CC", "ED", "GTV",]
+    tissues = [
+        "ET",
+        "WT",
+        "TC",
+        "NETC",
+        "SNFH",
+        "RC",
+        "CC",
+        "ED",
+        "GTV",
+    ]
 
     res = (
         df.set_index("Labels")
@@ -159,34 +166,12 @@ def score(pred_lst, label, mapping=None):
     return pd.concat(scores).sort_values(by="scan_id")
 
 
-def main():
-    """Main function."""
-    args = get_args()
-    preds = utils.inspect_zip(args.predictions_file, path=PRED_PARENT_DIR)
-    golds = utils.inspect_zip(args.goldstandard_file, path=GT_PARENT_DIR)
-    if args.second_goldstandard_file:
-        golds.extend(utils.inspect_zip(args.second_goldstandard_file, path=GT_PARENT_DIR))
-    mapping = get_label_mapping(args.mapping_file, key_col="NewID", value_col="Cohort")
-
-    results = score(preds, args.label, mapping)
-
-    # Get number of segmentations predicted by participant, as well as
-    # descriptive statistics for results.
-    cases_evaluated = len(results.index)
-    metrics = (
-        results.describe()
-        .rename(index={"25%": "25quantile", "50%": "median", "75%": "75quantile"})
-        .drop(["count", "min", "max"])
-    )
-    results = pd.concat([results, metrics])
-
-    # CSV file of scores for all scans.
-    syn = synapseclient.Synapse(configPath=args.synapse_config)
-    syn.login(silent=True)
+def upload_results(parent, results, label):
+    """Upload individual scores as CSV files to Synapse."""
 
     # BraTS-MEN-RT results only has one tissue, so it'd be more convenient
     # to have all metrics in a single file.
-    if args.label == "BraTS-MEN-RT":
+    if label == "BraTS-MEN-RT":
         results.to_csv("all_scores.csv")
     else:
         results.to_csv(
@@ -205,25 +190,66 @@ def main():
                 if not col.startswith("LesionWise") and not col.startswith("Num")
             ],
         )
-        csv_full = synapseclient.File("all_full_scores.csv", parent=args.parent_id)
+        csv_full = synapseclient.File("all_full_scores.csv", parent=parent)
         csv_full = syn.store(csv_full)
 
-    csv = synapseclient.File("all_scores.csv", parent=args.parent_id)
+    csv = synapseclient.File("all_scores.csv", parent=parent)
     csv = syn.store(csv)
 
-    # Results file for annotations.
-    with open(args.output, "w") as out:
+    return csv.id, csv_full.id
+
+
+def main(args):
+    """Main function."""
+    preds = utils.inspect_zip(args.predictions_file, path=PRED_PARENT_DIR)
+    golds = utils.inspect_zip(args.goldstandard_file, path=GT_PARENT_DIR)
+    if args.second_goldstandard_file:
+        golds.extend(
+            utils.inspect_zip(args.second_goldstandard_file, path=GT_PARENT_DIR)
+        )
+    mapping = get_label_mapping(args.mapping_file, key_col="NewID", value_col="Cohort")
+
+    try:
+        results = score(preds, args.label, mapping)
+    except ValueError:
+        results = {}
+
+    if results.empty:
+        res_dict = {
+            "submission_errors": "Something went wrong during evaluation; submission cannot be scored.",
+            "submission_status": "INVALID",
+        }
+    else:
+        # Get number of segmentations predicted by participant, as well as
+        # descriptive statistics for results.
+        cases_evaluated = len(results.index)
+        metrics = (
+            results.describe()
+            .rename(index={"25%": "25quantile", "50%": "median", "75%": "75quantile"})
+            .drop(["count", "min", "max"])
+        )
+        results = pd.concat([results, metrics])
+
+        csv_id, csv_full_id = upload_results(args.parent_id, results, args.label)
+
         res_dict = {
             **results.loc["mean"],
             "cases_evaluated": cases_evaluated,
-            "submission_scores": csv.id,
+            "submission_scores": csv_id,
             "submission_status": "SCORED",
         }
         if args.label != "BraTS-MEN-RT":
-            res_dict["submission_scores_legacy"] = csv_full.id
+            res_dict["submission_scores_legacy"] = csv_full_id
         res_dict = {k: v for k, v in res_dict.items() if not pd.isna(v)}
+
+    with open(args.output, "w") as out:
         out.write(json.dumps(res_dict))
 
 
 if __name__ == "__main__":
-    main()
+    args = get_args()
+
+    syn = synapseclient.Synapse(configPath=args.synapse_config)
+    syn.login(silent=True)
+
+    main(args)
