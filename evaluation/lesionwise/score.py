@@ -25,6 +25,9 @@ import metrics_MET
 import metrics_PED
 import metrics_SSA
 
+PRED_PARENT_DIR = "pred"
+GT_PARENT_DIR = "gt"
+
 
 def get_args():
     """Set up command-line interface and get arguments."""
@@ -36,6 +39,8 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--goldstandard_file",
                         type=str, default="/goldstandard.zip")
+    parser.add_argument("-g2", "--second_goldstandard_file",
+                        type=str)
     parser.add_argument("-o", "--output", type=str, default="results.json")
     parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
     parser.add_argument("-m", "--mapping_file",
@@ -56,13 +61,13 @@ def get_label_mapping(f, key_col, value_col):
         return {}
 
 
-def calculate_per_lesion(parent, pred, scan_id, cohort, label):
+def calculate_per_lesion(pred, scan_id, cohort, label):
     """
     Run per-lesionwise computation of prediction scan against
     goldstandard.
     """
     # Default goldstandard file format.
-    gold = os.path.join(parent, f"{label}-{scan_id}-seg.nii.gz")
+    gold = os.path.join(GT_PARENT_DIR, f"{label}-{scan_id}-seg.nii.gz")
     match cohort:
         case "BraTS-GLI":
             return metrics_GLI.get_LesionWiseResults(
@@ -74,7 +79,7 @@ def calculate_per_lesion(parent, pred, scan_id, cohort, label):
             )
         case "BraTS-MEN-RT":
             # BraTS-MEN-RT uses GTV instead of SEG as the goldstandard.
-            gold = os.path.join(parent, f"{label}-{scan_id}_gtv.nii.gz")
+            gold = os.path.join(GT_PARENT_DIR, f"{label}-{scan_id}_gtv.nii.gz")
             return metrics_MEN_RT.get_LesionWiseResults(
                 pred_file=pred, gt_file=gold, challenge_name=cohort
             )
@@ -138,7 +143,7 @@ def extract_metrics(df, label, scan_id):
     return res
 
 
-def score(parent, pred_lst, label, mapping=None):
+def score(pred_lst, label, mapping=None):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
@@ -147,7 +152,8 @@ def score(parent, pred_lst, label, mapping=None):
             cohort = f"BraTS-{mapping.get('BraTS-GoAT-' + scan_id)}"
         else:
             cohort = label
-        results, _ = calculate_per_lesion(parent, pred, scan_id, cohort, label)
+        pred_file = os.path.join(PRED_PARENT_DIR, pred)
+        results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
         scan_scores = extract_metrics(results, label, scan_id)
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
@@ -156,12 +162,13 @@ def score(parent, pred_lst, label, mapping=None):
 def main():
     """Main function."""
     args = get_args()
-    preds = utils.inspect_zip(args.predictions_file)
-    golds = utils.inspect_zip(args.goldstandard_file)
+    preds = utils.inspect_zip(args.predictions_file, path=PRED_PARENT_DIR)
+    golds = utils.inspect_zip(args.goldstandard_file, path=GT_PARENT_DIR)
+    if args.second_goldstandard_file:
+        golds.extend(utils.inspect_zip(args.second_goldstandard_file, path=GT_PARENT_DIR))
     mapping = get_label_mapping(args.mapping_file, key_col="NewID", value_col="Cohort")
 
-    dir_name = os.path.split(golds[0])[0]
-    results = score(dir_name, preds, args.label, mapping)
+    results = score(preds, args.label, mapping)
 
     # Get number of segmentations predicted by participant, as well as
     # descriptive statistics for results.
