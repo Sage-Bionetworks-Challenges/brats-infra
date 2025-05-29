@@ -25,7 +25,7 @@ expression: |2-
     if (inputs.queue == "9615898") {
       return {
         gt_synid: "syn64912121",  // Pre GT
-        gt2_synid: "syn61790732"  // Post GT
+        gt2_synid: "syn61790732",  // Post GT
         label: "BraTS-GLI"
       };
     } 
