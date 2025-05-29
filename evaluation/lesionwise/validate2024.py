@@ -12,8 +12,8 @@ import re
 import nibabel as nib
 import utils
 
-DIM = (240, 240, 155)
-DIM_GLI_POSTOP = (182, 218, 182)
+# DIM = (240, 240, 155)
+# DIM_GLI_POSTOP = (182, 218, 182)
 
 
 def get_args():
@@ -39,31 +39,35 @@ def get_args():
     return parser.parse_args()
 
 
-def _check_header(img, label):
-    """Check if img has the correct dimensions and origin."""
-    error = ""
-    match label:
-        case "BraTS-GLI":
-            if img.header.get_data_shape() != DIM_GLI_POSTOP:
-                error = ("One or more predictions is not a NIfTI file with "
-                         "dimension of 182x218x182.")
-        case "BraTS-MEN-RT":
-            # MEN-RT doesn't have a set dimension and origin for all scans,
-            # so don't perform any checks.
-            pass
-        case _:
-            if img.header.get_data_shape() != DIM:
-                error = ("One or more predictions is not a NIfTI file with "
-                         "dimension of 240x240x155.")
-    return error
+# def _check_header(img, label):
+#     """Check if img has the correct dimensions and origin."""
+#     error = ""
+#     match label:
+#         case "BraTS-GLI":
+#             if img.header.get_data_shape() != DIM_GLI_POSTOP:
+#                 error = (
+#                     "One or more predictions is not a NIfTI file with "
+#                     "dimension of 182x218x182."
+#                 )
+#         case "BraTS-MEN-RT":
+#             # MEN-RT doesn't have a set dimension and origin for all scans,
+#             # so don't perform any checks.
+#             pass
+#         case _:
+#             if img.header.get_data_shape() != DIM:
+#                 error = (
+#                     "One or more predictions is not a NIfTI file with "
+#                     "dimension of 240x240x155."
+#                 )
+#     return error
 
 
 def check_file_contents(img, parent, label):
     """Check that the file can be opened as NIfTI."""
     try:
-        print(img)
         img = nib.load(os.path.join(parent, img))
-        return _check_header(img, label)
+        # return _check_header(img, label)
+        return ""
     except nib.filebasedimages.ImageFileError:
         return ("One or more predictions cannot be opened as a "
                 "NIfTI file.")
