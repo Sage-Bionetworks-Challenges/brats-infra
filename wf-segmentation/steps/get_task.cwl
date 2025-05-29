@@ -12,10 +12,10 @@ inputs:
   type: string
 
 outputs:
-- id: synid
+- id: gt_synid
   type: string
-- id: synid2
-  type: string?
+- id: gt2_synid
+  type: string
 - id: label
   type: string
 expression: |2-
@@ -24,48 +24,48 @@ expression: |2-
     // BraTS-GLI
     if (inputs.queue == "9615898") {
       return {
-        synid: "syn64912121",  // Pre GT
-        synid2: "syn61790732"  // Post GT
+        gt_synid: "syn64912121",  // Pre GT
+        gt2_synid: "syn61790732"  // Post GT
         label: "BraTS-GLI"
       };
     } 
     // BraTS-MEN
     else if (inputs.queue == "9615899") {
       return {
-        synid: "syn51930262",
-        synid2: "",
+        gt_synid: "syn51930262",
+        gt2_synid: "syn67006969", // empty zip
         label: "BraTS-MEN"
       };
     } 
     // BraTS-MEN-RT
     else if (inputs.queue == "9615900") {
       return {
-        synid: "syn61484747",
-        synid2: "",
+        gt_synid: "syn61484747",
+        gt2_synid: "syn67006969", // empty zip
         label: "BraTS-MEN-RT"
       };
     } 
     // BraTS-MET
     else if (inputs.queue == "9615901") {
       return {
-        synid: "syn64915944",
-        synid2: "",
+        gt_synid: "syn64915944",
+        gt2_synid: "syn67006969", // empty zip
         label: "BraTS-MET"
       };
     } 
     // BraTS-SSA
     else if (inputs.queue == "9615902") {
       return {
-        synid: "syn61612353",
-        synid2: "",
+        gt_synid: "syn61612353",
+        gt2_synid: "syn67006969", // empty zip
         label: "BraTS-SSA"
       };
     } 
     // BraTS-PED
     else if (inputs.queue == "9615903") {
       return {
-        synid: "syn60969497",
-        synid2: "",
+        gt_synid: "syn60969497",
+        gt2_synid: "syn67006969", // empty zip
         label: "BraTS-PED"
       }
     }

@@ -69,8 +69,8 @@ steps:
       - id: queue
         source: "#download_submission/evaluation_id"
     out:
-      - id: synid
-      - id: synid2
+      - id: gt_synid
+      - id: gt2_synid
       - id: label
 
   download_goldstandard:
@@ -79,20 +79,19 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        source: "#get_task_entities/synid"
+        source: "#get_task_entities/gt_synid"
       - id: synapse_config
         source: "#synapseConfig"
     out:
       - id: filepath
 
   download_second_goldstandard:
-    doc: Download (optional) second goldstandard
+    doc: Download additional goldstandard (empty zipfile if not available)
     run: |-
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
-    when: $(get_task_entities.synid2 != "")
     in:
       - id: synapseid
-        source: "#get_task_entities/synid2"
+        source: "#get_task_entities/gt2_synid"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -106,6 +105,8 @@ steps:
         source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
+      - id: second_goldstandard
+        source: "#download_second_goldstandard/filepath"
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern

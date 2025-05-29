@@ -11,6 +11,8 @@ inputs:
   type: File
 - id: goldstandard
   type: File
+- id: second_goldstandard
+  type: File?
 - id: entity_type
   type: string
 - id: pred_pattern
@@ -44,6 +46,8 @@ arguments:
   valueFrom: $(inputs.input_file)
 - prefix: -g
   valueFrom: $(inputs.goldstandard.path)
+- prefix: -g2
+  valueFrom: $(inputs.second_goldstandard.path)
 - prefix: -e
   valueFrom: $(inputs.entity_type)
 - prefix: -o
