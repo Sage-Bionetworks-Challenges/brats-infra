@@ -17,6 +17,8 @@ inputs:
   type: File
 - id: second_goldstandard
   type: File?
+  inputBinding:
+    prefix: -g2
 - id: label
   type: string
 - id: check_validation_finished
@@ -44,8 +46,6 @@ arguments:
   valueFrom: $(inputs.input_file.path)
 - prefix: -g
   valueFrom: $(inputs.goldstandard.path)
-- prefix: -g2
-  valueFrom: $(inputs.second_goldstandard.path)
 - prefix: -l
   valueFrom: $(inputs.label)
 - prefix: -o
