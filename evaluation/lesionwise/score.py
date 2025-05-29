@@ -173,6 +173,7 @@ def upload_results(parent, results, label):
     # to have all metrics in a single file.
     if label == "BraTS-MEN-RT":
         results.to_csv("all_scores.csv")
+        csv_full_id = ""
     else:
         results.to_csv(
             "all_scores.csv",
@@ -192,11 +193,12 @@ def upload_results(parent, results, label):
         )
         csv_full = synapseclient.File("all_full_scores.csv", parent=parent)
         csv_full = syn.store(csv_full)
+        csv_full_id = csv_full.id
 
     csv = synapseclient.File("all_scores.csv", parent=parent)
     csv = syn.store(csv)
 
-    return csv.id, csv_full.id
+    return csv.id, csv_full_id
 
 
 def main(args):
