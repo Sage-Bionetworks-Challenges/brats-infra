@@ -72,7 +72,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn61349259"
+        valueFrom: "syn67722849"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -84,7 +84,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn61684769"
+        valueFrom: "syn68144257"  # TODO
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -173,7 +173,7 @@ steps:
       - id: gandlf_config
         source: "#download_config/filepath"
       - id: penalty_label
-        default: 6
+        default: 9
       - id: subject_id_pattern
         source: "#pattern"
       - id: check_validation_finished
