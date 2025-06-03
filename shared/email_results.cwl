@@ -62,11 +62,20 @@ requirements:
             message.append(f"\nLegacy scores are available here: https://www.synapse.org/#!Synapse:{csv_full_id}")
           else:
             message.append(f"Each scan's individual scores are available here: https://www.synapse.org/#!Synapse:{csv_id}")
-          message.append("\n\nSincerely,\nChallenge Administrator")
-          syn.sendMessage(
-              userIds=[participantid],
-              messageSubject=subject,
-              messageBody="".join(message).replace("PSNR_01", "PSNR"))
+          
+      else:
+        subject = f"Submission to '{evaluation.name}' not scored"
+        message = [
+            f"Hello {name},\n\n",
+            f"Unfortunately, your submission (id: {sub.id}) could not be scored, possibly due to mismatches ",
+            "in origin or orientation. Please review the spatial characteristics of your predictions."
+            "\n\n"
+          ]
+      message.append("\n\nSincerely,\nChallenge Administrator")
+      syn.sendMessage(
+          userIds=[participantid],
+          messageSubject=subject,
+          messageBody="".join(message).replace("PSNR_01", "PSNR"))
 
 inputs:
 - id: submissionid
