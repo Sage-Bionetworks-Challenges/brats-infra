@@ -24,10 +24,12 @@ def get_args():
     parser.add_argument("-e", "--entity_type", type=str, required=True)
     parser.add_argument("-o", "--output", type=str)
     parser.add_argument("--subject_id_pattern", type=str, default="")
+    parser.add_argument("--min_label", type=int, default=0)
+    parser.add_argument("--max_label", type=int, default=5)
     return parser.parse_args()
 
 
-def validate(pred_file, pattern):
+def validate(pred_file, pattern, min_val, max_val):
     """Validate predictions file against goldstandard."""
     errors = []
     try:
@@ -45,8 +47,8 @@ def validate(pred_file, pattern):
         errors.append(vtk.check_duplicate_keys(pred["SubjectID"]))
         errors.append(vtk.check_values_range(
             pred["Prediction"],
-            min_val=0,
-            max_val=5
+            min_val=min_val,
+            max_val=max_val,
         ))
 
         # Check that SubjectIDs contain the filename of the digitized
@@ -70,6 +72,8 @@ def main():
         errors = validate(
             pred_file=args.predictions_file,
             pattern=args.subject_id_pattern,
+            min_val=args.min_label,
+            max_val=args.max_label,
         )
 
     invalid_reasons = "\n".join(filter(None, errors))
