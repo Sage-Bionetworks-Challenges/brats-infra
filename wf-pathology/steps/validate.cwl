@@ -13,6 +13,14 @@ inputs:
   type: string
 - id: subject_id_pattern
   type: string?
+- id: min_label
+  type: int?
+  inputBinding:
+    prefix: --min_label
+- id: max_label
+  type: int?
+  inputBinding:
+    prefix: --max_label
 
 outputs:
 - id: results
@@ -45,7 +53,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/pathology-evaluation:v1.0.0
+    dockerPull: docker.synapse.org/syn53708126/pathology-evaluation:v2.0.0
 
 s:author:
 - class: s:Person

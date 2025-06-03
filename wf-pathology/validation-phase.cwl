@@ -100,6 +100,10 @@ steps:
         source: "#download_submission/entity_type"
       - id: subject_id_pattern
         source: "#pattern"
+      - id: min_label
+        default: 0
+      - id: max_label
+        default: 8
     out:
       - id: results
       - id: status
