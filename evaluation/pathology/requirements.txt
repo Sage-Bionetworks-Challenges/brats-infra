@@ -1,2 +1,2 @@
-cnb-tools==0.3.2
-opencv-python-headless
+cnb-tools==0.3.1
+pandas
