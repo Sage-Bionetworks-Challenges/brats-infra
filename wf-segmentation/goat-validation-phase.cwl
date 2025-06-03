@@ -224,6 +224,21 @@ steps:
       - id: previous_annotation_finished
         source: "#add_validation_annots/finished"
     out: [finished]
+
+  check_score_status:
+    doc: >
+      Check the scoring status of the submission; if 'INVALID', throw an
+      exception so that final status is 'INVALID' instead of 'ACCEPTED'
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
+    in:
+      - id: status
+        source: "#score/status"
+      - id: previous_annotation_finished
+        source: "#add_score_annots/finished"
+      - id: previous_email_finished
+        source: "#send_score_results/finished"
+    out: [finished]
  
 s:author:
 - class: s:Person
