@@ -160,8 +160,13 @@ def score(pred_lst, label, mapping=None):
         else:
             cohort = label
         pred_file = os.path.join(PRED_PARENT_DIR, pred)
-        results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
-        scan_scores = extract_metrics(results, label, scan_id)
+        try:
+            results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
+            scan_scores = extract_metrics(results, label, scan_id)
+        except ValueError:
+            scan_scores = pd.DataFrame({
+                "scan_id": [f"{label}-{scan_id}"],
+            }).set_index("scan_id")
         scores.append(scan_scores)
     return pd.concat(scores).sort_values(by="scan_id")
 
@@ -211,14 +216,14 @@ def main(args):
         )
     mapping = get_label_mapping(args.mapping_file, key_col="NewID", value_col="Cohort")
 
-    try:
-        results = score(preds, args.label, mapping)
-    except ValueError:
-        results = {}
-
+    results = score(preds, args.label, mapping)
     if results.empty:
         res_dict = {
-            "submission_errors": "Something went wrong during evaluation; submission cannot be scored.",
+            "submission_errors": (
+                "Scores could not be calculated for this submission, possibly "
+                "caused by mismatches in origin or orientation. Please review "
+                "the spatial characteristics of your predictions."
+            ),
             "submission_status": "INVALID",
         }
     else:
