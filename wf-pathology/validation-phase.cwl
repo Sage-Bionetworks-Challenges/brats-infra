@@ -29,7 +29,7 @@ inputs:
   pattern:
     label: Regex pattern for valid SubjectIDs
     type: string
-    default: "BraTSPath_Val.*png$"
+    default: "BraTSPath_Val.*jpg$"
 
 outputs: []
 
