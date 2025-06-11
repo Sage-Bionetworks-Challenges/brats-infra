@@ -250,8 +250,13 @@ def main(args):
 
         csv_id, csv_full_id = upload_results(args.parent_id, results, args.label)
 
+        filtered_cols = [
+            colname
+            for colname in results.columns
+            if "Dice" in colname or "NSD" in colname
+        ]
         res_dict = {
-            **results.loc["mean"],
+            **results.loc["mean", filtered_cols],
             "cases_evaluated": cases_evaluated,
             "submission_scores": csv_id,
             "submission_scores_legacy": csv_full_id,
