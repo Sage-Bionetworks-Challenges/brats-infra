@@ -1,4 +1,4 @@
-FROM ghcr.io/mlcommons/gandlf:0.1.3-cpu
+FROM ghcr.io/mlcommons/gandlf:master-cpu
 
 WORKDIR /usr/local/bin/
 

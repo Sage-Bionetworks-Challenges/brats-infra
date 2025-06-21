@@ -41,7 +41,7 @@ def get_args():
 
 def run_gandlf(config_file, input_file, output_file):
     """
-    Run GanDLF classification metrics computations.
+    Run GaNDLF classification metrics computations.
     """
     cmd = [
         "gandlf", "generate-metrics",
@@ -60,7 +60,7 @@ def _extract_value_by_pattern(col, pattern_to_extract):
 def create_gandlf_input(pred_file, gold_file, out_file,
                         penalty_label, pattern):
     """
-    Create 3-col CSV file to use as input to GanDLF.
+    Create 3-col CSV file to use as input to GaNDLF.
     """
 
     # Extract only the filename from SubjectID for easier joins.
