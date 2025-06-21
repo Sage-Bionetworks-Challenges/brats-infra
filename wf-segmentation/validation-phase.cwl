@@ -26,6 +26,14 @@ inputs:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
+  pred_pattern:
+    label: Regex pattern for valid prediction filenames
+    type: string
+    default: "(\\d{4,5}-\\d{1,3})"
+  gold_pattern:
+    label: Regex pattern for valid prediction filenames
+    type: string
+    default: "(\\d{4,5}-\\d{1,3})[-_](seg|gtv)"
 
 outputs: []
 
@@ -110,9 +118,9 @@ steps:
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern
-        default: "(\\d{4,5}-\\d{1,3})"
+        source: "#pred_pattern"
       - id: gold_pattern
-        default: "(\\d{4,5}-\\d{1,3})[-_](seg|gtv)"
+        source: "#gold_pattern"
       - id: label
         source: "#get_task_entities/label"
     out:
