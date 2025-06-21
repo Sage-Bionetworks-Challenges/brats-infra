@@ -20,7 +20,9 @@ inputs:
   inputBinding:
     prefix: -g2
 - id: label
-  type: string
+  type: string?
+  inputBinding:
+    prefix: -l
 - id: check_validation_finished
   type: boolean?
 
@@ -46,8 +48,6 @@ arguments:
   valueFrom: $(inputs.input_file.path)
 - prefix: -g
   valueFrom: $(inputs.goldstandard.path)
-- prefix: -l
-  valueFrom: $(inputs.label)
 - prefix: -o
   valueFrom: results.json
 

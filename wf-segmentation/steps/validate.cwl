@@ -18,11 +18,17 @@ inputs:
 - id: entity_type
   type: string
 - id: pred_pattern
-  type: string
+  type: string?
+  inputBinding:
+    prefix: --pred_pattern
 - id: gold_pattern
-  type: string
+  type: string?
+  inputBinding:
+    prefix: --gold_pattern
 - id: label
-  type: string
+  type: string?
+  inputBinding:
+    prefix: -l
 
 outputs:
 - id: results
@@ -52,12 +58,6 @@ arguments:
   valueFrom: $(inputs.entity_type)
 - prefix: -o
   valueFrom: results.json
-- prefix: --pred_pattern
-  valueFrom: $(inputs.pred_pattern)
-- prefix: --gold_pattern
-  valueFrom: $(inputs.gold_pattern)
-- prefix: -l
-  valueFrom: $(inputs.label)
 
 hints:
   DockerRequirement:
