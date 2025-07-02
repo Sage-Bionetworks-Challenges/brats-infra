@@ -61,13 +61,17 @@ def get_args():
 #                 )
 #     return error
 
+def _check_dimension(img):
+    if len(img.shape) != 3:
+        return "One or more predictions is not a 3D image."
+    return ""
+
 
 def check_file_contents(img, parent, label):
     """Check that the file can be opened as NIfTI."""
     try:
         img = nib.load(os.path.join(parent, img))
-        # return _check_header(img, label)
-        return ""
+        return _check_dimension(img)
     except nib.filebasedimages.ImageFileError:
         return ("One or more predictions cannot be opened as a "
                 "NIfTI file.")
