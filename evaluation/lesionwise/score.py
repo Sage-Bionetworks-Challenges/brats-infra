@@ -10,11 +10,12 @@ Run lesion-wise computation and return:
   - Number of TP, FP, FN
 """
 import argparse
-# import concurrent.futures
+import concurrent.futures
 import json
-# import multiprocessing
+import multiprocessing
 import os
 import re
+
 
 import metrics_GLI
 import metrics_MEN
@@ -152,24 +153,33 @@ def extract_metrics(df, label, scan_id):
     return res
 
 
+def score_one_prediction(data):
+    pred, label, mapping = data
+
+    scan_id = re.search(r"(\d{4,5}(-\d{1,3})?)\.nii\.gz$", pred).group(1)
+    if mapping and label == "BraTS-GoAT":
+        cohort = f"BraTS-{mapping.get('BraTS-GoAT-' + scan_id)}"
+    else:
+        cohort = label
+    pred_file = os.path.join(PRED_PARENT_DIR, pred)
+    try:
+        results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
+        scan_scores = extract_metrics(results, label, scan_id)
+    except ValueError:
+        scan_scores = pd.DataFrame(
+            {
+                "scan_id": [f"{label}-{scan_id}"],
+            }
+        ).set_index("scan_id")
+    return scan_scores
+
+
 def score(pred_lst, label, mapping=None):
     """Compute and return scores for each scan."""
-    scores = []
-    for pred in pred_lst:
-        scan_id = re.search(r"(\d{4,5}(-\d{1,3})?)\.nii\.gz$", pred).group(1)
-        if mapping and label == "BraTS-GoAT":
-            cohort = f"BraTS-{mapping.get('BraTS-GoAT-' + scan_id)}"
-        else:
-            cohort = label
-        pred_file = os.path.join(PRED_PARENT_DIR, pred)
-        try:
-            results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
-            scan_scores = extract_metrics(results, label, scan_id)
-        except ValueError:
-            scan_scores = pd.DataFrame({
-                "scan_id": [f"{label}-{scan_id}"],
-            }).set_index("scan_id")
-        scores.append(scan_scores)
+    data = [(pred, label, mapping) for pred in pred_lst]
+    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as pool:
+        results = pool.map(score_one_prediction, data)
+        scores = [pred_score for pred_score in results]
     return pd.concat(scores).sort_values(by="scan_id")
 
 
@@ -231,12 +241,12 @@ def main(args):
     else:
         # Per organizer request: add penalty scores for cases where the
         # participant did not provide a prediction. The worst possible
-        # scores are 1 for NSD, 394 for HD95, and 0 for everything else.
+        # scores are 394 for HD95, and 0 for everything else.
         gold_labels = {filename.replace("-seg.nii.gz", "") for filename in golds}
         missing_scan_ids = gold_labels - set(results.index)
         if missing_scan_ids:
             penalty_scores = {
-                col: 1 if "NSD" in col else (394 if "Hausdorff" in col else 0)
+                col: 394 if "Hausdorff" in col else 0
                 for col in results.columns
             }
             penalized_preds = pd.DataFrame(penalty_scores, index=list(missing_scan_ids))
@@ -273,8 +283,8 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # Important 
-    # multiprocessing.freeze_support()
+    # Important
+    multiprocessing.freeze_support()
 
     args = get_args()
 
