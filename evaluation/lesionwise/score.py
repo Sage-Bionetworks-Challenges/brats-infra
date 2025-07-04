@@ -241,12 +241,16 @@ def main(args):
     else:
         # Per organizer request: add penalty scores for cases where the
         # participant did not provide a prediction. The worst possible
-        # scores are 394 for HD95, and 0 for everything else.
+        # scores are 337/374 for HD95 (task-dependent), and 0 for everything else.
         gold_labels = {filename.replace("-seg.nii.gz", "") for filename in golds}
         missing_scan_ids = gold_labels - set(results.index)
         if missing_scan_ids:
             penalty_scores = {
-                col: 394 if "Hausdorff" in col else 0
+                col: (
+                    337
+                    if "Hausdorff" in col and args.label == "BraTS-GLI"
+                    else (374 if "Hausdorff" in col else 0)
+                )
                 for col in results.columns
             }
             penalized_preds = pd.DataFrame(penalty_scores, index=list(missing_scan_ids))
