@@ -10,7 +10,7 @@ import json
 import subprocess
 
 import pandas as pd
-import numpy as np
+# import numpy as np
 import synapseclient
 import utils
 
@@ -120,7 +120,7 @@ def extract_metrics(gandlf_results: str) -> pd.DataFrame:
         .filter(regex=tissues, axis=1)
     )
     res.columns = [col.replace(".", "_") for col in res.columns]
-    return res.set_index("scan_id")
+    return res
 
 
 def upload_results(parent_id, private_parent_id, results):
