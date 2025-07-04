@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scoring script for Tasks 1-7 (segmentation).
+"""Scoring script for BraTS 2025 Task 4 (BraTS-MET)
 
 Run Panoptica computation and return:
   - Dice
@@ -7,11 +7,10 @@ Run Panoptica computation and return:
 """
 import argparse
 import json
-import os
-import re
 import subprocess
 
 import pandas as pd
+import numpy as np
 import synapseclient
 import utils
 
@@ -23,16 +22,15 @@ def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--parent_id", type=str, required=True)
+    parser.add_argument("--private_parent_id", type=str, required=True)
     parser.add_argument("-s", "--synapse_config", type=str, default="/.synapseConfig")
     parser.add_argument("-p", "--predictions_file",
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--groundtruth_file",
                         type=str, default="/groundtruth.zip")
-    parser.add_argument("-g2", "--second_groundtruth_file", type=str)
     parser.add_argument("-c", "--gandlf_config",
                         type=str, default="/gandlf_config.yaml")
     parser.add_argument("-o", "--output", type=str, default="results.json")
-    parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
     parser.add_argument("--subject_id_pattern",
                         type=str, default=r"(BraTS.*\d{4,5}-\d{1,3})")
     return parser.parse_args()
@@ -125,12 +123,20 @@ def extract_metrics(gandlf_results: str) -> pd.DataFrame:
     return res.set_index("scan_id")
 
 
-def upload_results(parent_id, results):
+def upload_results(parent_id, private_parent_id, results):
     """Upload individual scores as CSV files to Synapse."""
-    results.to_csv("all_scores.csv")
+
+    # For participants, only output the subject-wise scores.
+    results.filter(regex="global_bin_dsc|global_bin_nsd|prec|rec", axis=1).to_csv("all_scores.csv")
     csv = synapseclient.File("all_scores.csv", parent=parent_id)
     csv = syn.store(csv)
-    return csv.id
+
+    # For organizers, output all scores.
+    results.to_csv("panoptica_scores.csv")
+    private_csv = synapseclient.File("panoptica_scores.csv", parent=private_parent_id)
+    private_csv = syn.store(private_csv)
+
+    return csv.id, private_csv.id
 
 
 def main(args):
@@ -143,13 +149,6 @@ def main(args):
         args.groundtruth_file,
         dest_path=GT_PARENT_DIR,
     )
-    if args.second_groundtruth_file:
-        truths.extend(
-            utils.inspect_archive(
-                args.second_groundtruth_file,
-                dest_path=GT_PARENT_DIR,
-            )
-        )
 
     gandlf_input_file = "tmp.csv"
     create_gandlf_input(
@@ -172,20 +171,25 @@ def main(args):
         .drop(["count", "min", "max"])
     )
     results = pd.concat([results, metrics])
-    csv_id = upload_results(args.parent_id, results)
+    csv_id, private_csv_id = upload_results(
+        args.parent_id,
+        args.private_parent_id,
+        results,
+    )
 
     # Filter for relevant metrics to annotate submission, since Synapse only
     # allows for max of 100 annotations per entity.
     filtered_cols = [
         colname
         for colname in results.columns
-        if "dsc" in colname or "nsd" in colname
+        if "global_bin_dsc" in colname or "global_bin_nsd" in colname
     ]
     res_dict = {
         **results.loc["mean", filtered_cols],
         "cases_evaluated": cases_evaluated,
         "submission_scores": csv_id,
         "submission_status": "SCORED",
+        "full_panoptica_scores": private_csv_id,
     }
     res_dict = {k: v for k, v in res_dict.items() if not pd.isna(v)}
     with open(args.output, "w") as out:
