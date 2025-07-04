@@ -82,11 +82,45 @@ def create_gandlf_input(
 
 
 def extract_metrics(gandlf_results: str) -> pd.DataFrame:
-    """Convert results in JSON format into dataframe."""
+    """
+    Convert results in JSON format into dataframe and get specific metrics
+    for specific tissues.
+    """
+    select_cols = "|".join([
+        "num_ref_instances",
+        "num_pred_instances",
+        "tp",
+        "fp",
+        "fn",
+        "prec",
+        "rec",
+        "rq",
+        "sq_dsc",
+        "sq_dsc_std",
+        "pq_dsc",
+        "sq_hd95",
+        "sq_hd95_std",
+        "sq_nsd",
+        "sq_nsd_std",
+        "global_bin_dsc",
+        "global_bin_hd95",
+        "global_bin_nsd",
+    ])
+    tissues = "|".join([
+        "et",
+        "rc",
+        "tc",
+        "wt",
+    ])
     with open(gandlf_results) as f:
         metrics = json.load(f)
-    res = pd.json_normalize(metrics.values())
-    res["scan_id"] = metrics.keys()
+    df = pd.json_normalize(metrics.values())
+    df["scan_id"] = metrics.keys()
+    res = (
+        df.set_index("scan_id")
+        .filter(regex=select_cols, axis=1)
+        .filter(regex=tissues, axis=1)
+    )
     res.columns = [col.replace(".", "_") for col in res.columns]
     return res.set_index("scan_id")
 
