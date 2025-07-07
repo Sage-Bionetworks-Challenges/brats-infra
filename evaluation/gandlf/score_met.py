@@ -10,7 +10,8 @@ import json
 import subprocess
 
 import pandas as pd
-# import numpy as np
+
+import numpy as np
 import synapseclient
 import utils
 
@@ -161,6 +162,14 @@ def main(args):
     gandlf_output_file = "tmp.json"
     run_gandlf(args.gandlf_config, gandlf_input_file, gandlf_output_file)
     results = extract_metrics(gandlf_output_file)
+
+    # Replaces any NaN or Inf scores in DSC, NSD, and HD95 columns with 1.
+    # This aligns the scoring behavior with Rachit's existing code.
+    cols_to_replace_scores = results.filter(regex=r"(dsc|nsd|hd95)$").columns
+    results[cols_to_replace_scores] = (
+        results[cols_to_replace_scores]
+        .replace([np.nan, np.inf], 1)
+    )
 
     # Get number of segmentations predicted by participant, as well as
     # descriptive statistics for results.
