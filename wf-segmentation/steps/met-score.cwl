@@ -38,7 +38,7 @@ outputs:
     outputEval: $(JSON.parse(self[0].contents)['submission_status'])
     loadContents: true
 
-baseCommand: score_seg.py
+baseCommand: score_met.py
 arguments:
 - prefix: --parent_id
   valueFrom: $(inputs.parent_id)
