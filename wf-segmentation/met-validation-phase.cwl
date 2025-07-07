@@ -78,6 +78,18 @@ steps:
     out:
       - id: filepath
 
+  download_config:
+    doc: Download GaNDLF config file for inference session
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
+    in:
+      - id: synapseid
+        valueFrom: "syn68603937"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out:
+      - id: filepath
+
   validate:
     doc: Validate submission, which should be a tar/zip of NIfTI files
     run: steps/validate.cwl
@@ -168,6 +180,8 @@ steps:
         source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
+      - id: gandlf_config
+        source: "#download_config/filepath"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:
