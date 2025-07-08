@@ -163,12 +163,19 @@ def main(args):
     run_gandlf(args.gandlf_config, gandlf_input_file, gandlf_output_file)
     results = extract_metrics(gandlf_output_file)
 
-    # Replaces any NaN or Inf scores in DSC, NSD, and HD95 columns with 1.
-    # This aligns the scoring behavior with Rachit's existing code.
-    cols_to_replace_scores = results.filter(regex=r"(dsc|nsd|hd95)$").columns
-    results[cols_to_replace_scores] = (
-        results[cols_to_replace_scores]
-        .replace([np.nan, np.inf], 1)
+    # Replace any NaN in DSC and NSD to 1, and HD95 to 0; Inf in DSC and NSD
+    # to 0, and HD95 to 374.
+    cols_dsc_nsd = results.filter(regex=r"(dsc|nsd)$").columns
+    cols_hd95 = results.filter(regex=r"hd95$", axis=1).columns
+    results[cols_dsc_nsd] = (
+        results[cols_dsc_nsd]
+        .fillna(1)  # Replace NaN with 1
+        .replace([np.inf], 0)
+    )
+    results[cols_hd95] = (
+        results[cols_hd95]
+        .fillna(0)  # Replace NaN with 0
+        .replace([np.inf], 374)
     )
 
     # Get number of segmentations predicted by participant, as well as
