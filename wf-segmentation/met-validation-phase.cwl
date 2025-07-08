@@ -101,9 +101,9 @@ steps:
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern
-        default: "(\\d{5})"
+        default: "(\\d{5}-\\d{3})"
       - id: gold_pattern
-        default: "(\\d{5})-seg"
+        default: "(\\d{5}-\\d{3})-seg"
       - id: label
         source: "#cohortLabel"
     out:
