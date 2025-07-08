@@ -128,7 +128,7 @@ def upload_results(parent_id, private_parent_id, results):
     """Upload individual scores as CSV files to Synapse."""
 
     # For participants, only output the subject-wise scores.
-    results.filter(regex="global_bin_dsc|global_bin_nsd|prec|rec", axis=1).to_csv("all_scores.csv")
+    results.filter(regex="_(global_bin_dsc|global_bin_nsd)$", axis=1).to_csv("all_scores.csv")
     csv = synapseclient.File("all_scores.csv", parent=parent_id)
     csv = syn.store(csv)
 
