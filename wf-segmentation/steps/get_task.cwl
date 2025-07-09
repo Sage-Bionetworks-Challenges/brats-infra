@@ -46,13 +46,13 @@ expression: |2-
       };
     } 
     // BraTS-MET
-    else if (inputs.queue == "9615901") {
-      return {
-        gt_synid: "syn64915944",
-        gt2_synid: "syn67006969", // empty zip
-        label: "BraTS-MET"
-      };
-    } 
+    // else if (inputs.queue == "9615901") {
+    //   return {
+    //     gt_synid: "syn64915944",
+    //     gt2_synid: "syn67006969", // empty zip
+    //     label: "BraTS-MET"
+    //   };
+    // } 
     // BraTS-SSA
     else if (inputs.queue == "9615902") {
       return {
