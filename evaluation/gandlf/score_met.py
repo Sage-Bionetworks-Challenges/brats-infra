@@ -33,7 +33,8 @@ def get_args():
                         type=str, default="/gandlf_config.yaml")
     parser.add_argument("-o", "--output", type=str, default="results.json")
     parser.add_argument("--subject_id_pattern",
-                        type=str, default=r"(BraTS.*\d{4,5}-\d{1,3})")
+                        type=str, default=r"((BraTS.*)?\d{4,5}-\d{1,3})")
+    parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
     return parser.parse_args()
 
 
@@ -67,12 +68,18 @@ def create_gandlf_input(
     preds_df["Prediction"] = f"{PRED_PARENT_DIR}/" + preds_df["Prediction"]
     preds_df["SubjectID"] = _extract_value_by_pattern(
         preds_df.loc[:, "Prediction"], subject_id_pattern
-    )
+    )[0]
+
+    # If missing, add cohort label to prediction SubjectID.
+    missing_labels = ~preds_df["SubjectID"].str.contains("BraTS-MET")
+    preds_df.loc[missing_labels, "SubjectID"] = "BraTS-MET-" + \
+        preds_df.loc[missing_labels, "SubjectID"]
+
     gt_df = pd.DataFrame(gt_filepaths, columns=["Target"])
     gt_df["Target"] = f"{GT_PARENT_DIR}/" + gt_df["Target"]
     gt_df["SubjectID"] = _extract_value_by_pattern(
         gt_df.loc[:, "Target"], subject_id_pattern
-    )
+    )[0]
 
     # Keep merge as "inner" join so that there is always 1:1 between
     # prediction filepath and gt filepath.
