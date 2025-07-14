@@ -198,6 +198,8 @@ steps:
         source: "#download_goldstandard/filepath"
       - id: gandlf_config
         source: "#download_config/filepath"
+      - id: label
+        source: "#cohortLabel"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:

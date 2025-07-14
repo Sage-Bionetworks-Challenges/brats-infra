@@ -23,6 +23,10 @@ inputs:
   type: string?
   inputBinding:
     prefix: --subject_id_pattern
+- id: label
+  type: string?
+  inputBinding:
+    prefix: -l
 - id: check_validation_finished
   type: boolean?
 
