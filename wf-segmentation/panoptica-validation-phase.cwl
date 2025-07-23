@@ -26,10 +26,6 @@ inputs:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
-  cohortLabel:
-    label: Label for the segmentation task cohort
-    type: string
-    default: "BraTS-MET"
 
 outputs: []
 
@@ -138,6 +134,8 @@ steps:
         source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
+      - id: second_goldstandard
+        source: "#download_second_goldstandard/filepath"
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern
@@ -145,7 +143,7 @@ steps:
       - id: gold_pattern
         default: "(\\d{5}-\\d{3})-seg"
       - id: label
-        source: "#cohortLabel"
+        source: "#get_task_entities/label"
     out:
       - id: results
       - id: status
@@ -225,7 +223,7 @@ steps:
       - id: gandlf_config
         source: "#download_config/filepath"
       - id: label
-        source: "#cohortLabel"
+         source: "#get_task_entities/label"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:
