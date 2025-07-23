@@ -223,7 +223,7 @@ steps:
       - id: gandlf_config
         source: "#download_config/filepath"
       - id: label
-         source: "#get_task_entities/label"
+        source: "#get_task_entities/label"
       - id: check_validation_finished
         source: "#check_validation_status/finished"
     out:
