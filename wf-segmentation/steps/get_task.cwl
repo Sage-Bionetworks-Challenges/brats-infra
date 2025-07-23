@@ -18,6 +18,8 @@ outputs:
   type: string
 - id: label
   type: string
+- id: config
+  type: string?
 expression: |2-
 
   ${
@@ -34,7 +36,7 @@ expression: |2-
       return {
         gt_synid: "syn51930262",
         gt2_synid: "syn67006969", // empty zip
-        label: "BraTS-MEN"
+        label: "BraTS-MEN",
       };
     } 
     // BraTS-MEN-RT
@@ -42,23 +44,24 @@ expression: |2-
       return {
         gt_synid: "syn61484747",
         gt2_synid: "syn67006969", // empty zip
-        label: "BraTS-MEN-RT"
+        label: "BraTS-MEN-RT",
       };
     } 
     // BraTS-MET
-    // else if (inputs.queue == "9615901") {
-    //   return {
-    //     gt_synid: "syn64915944",
-    //     gt2_synid: "syn67006969", // empty zip
-    //     label: "BraTS-MET"
-    //   };
-    // } 
+    else if (inputs.queue == "9615901") {
+      return {
+        gt_synid: "syn64915944",
+        gt2_synid: "syn67006969", // empty zip
+        label: "BraTS-MET",
+        config: "syn68603937"
+      };
+    } 
     // BraTS-SSA
     else if (inputs.queue == "9615902") {
       return {
         gt_synid: "syn61612353",
         gt2_synid: "syn67006969", // empty zip
-        label: "BraTS-SSA"
+        label: "BraTS-SSA",
       };
     } 
     // BraTS-PED
@@ -66,7 +69,16 @@ expression: |2-
       return {
         gt_synid: "syn60969497",
         gt2_synid: "syn67006969", // empty zip
-        label: "BraTS-PED"
+        label: "BraTS-PED",
+      }
+    }
+    // BraSyn
+    else if (inputs.queue == "9615903") {
+      return {
+        gt_synid: "syn60969497",
+        gt2_synid: "syn67006969", // empty zip
+        label: "BraSyn",
+        config: "syn68741960"
       }
     }
     else {
