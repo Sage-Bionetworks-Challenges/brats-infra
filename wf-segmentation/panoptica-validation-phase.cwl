@@ -139,9 +139,9 @@ steps:
       - id: entity_type
         source: "#download_submission/entity_type"
       - id: pred_pattern
-        default: "((BraTS.*?)?-?\d{4,5}-\d{1,3})"
+        default: "((BraTS.*?)?-?\\d{4,5}-\\d{1,3})"
       - id: gold_pattern
-        default: "((BraTS.*?)?-?\d{4,5}-\d{1,3})-seg"
+        default: "((BraTS.*?)?-?\\d{4,5}-\\d{1,3})-seg"
       - id: label
         source: "#get_task_entities/label"
     out:
