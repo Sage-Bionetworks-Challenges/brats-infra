@@ -124,7 +124,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "#get_task_entities/config"
+        source: "#get_task_entities/config"
       - id: synapse_config
         source: "#synapseConfig"
     out:
