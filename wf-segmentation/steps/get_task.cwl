@@ -75,8 +75,8 @@ expression: |2-
     // BraSyn
     else if (inputs.queue == "9615905") {
       return {
-        gt_synid: "syn60969497",
-        gt2_synid: "syn67006969", // empty zip
+        gt_synid: "syn51514102",
+        gt2_synid: "syn52237053", // empty zip
         label: "BraSyn",
         config: "syn68741960"
       }
