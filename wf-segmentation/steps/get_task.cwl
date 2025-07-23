@@ -73,7 +73,7 @@ expression: |2-
       }
     }
     // BraSyn
-    else if (inputs.queue == "9615903") {
+    else if (inputs.queue == "9615905") {
       return {
         gt_synid: "syn60969497",
         gt2_synid: "syn67006969", // empty zip
