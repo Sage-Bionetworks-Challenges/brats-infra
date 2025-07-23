@@ -29,11 +29,13 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--groundtruth_file",
                         type=str, default="/groundtruth.zip")
+    parser.add_argument("-g2", "--second_goldstandard_file",
+                        type=str)
     parser.add_argument("-c", "--gandlf_config",
                         type=str, default="/gandlf_config.yaml")
     parser.add_argument("-o", "--output", type=str, default="results.json")
     parser.add_argument("--subject_id_pattern",
-                        type=str, default=r"((BraTS.*)?\d{4,5}-\d{1,3})")
+                        type=str, default=r"((BraTS.*?)?-?\d{4,5}-\d{1,3})")
     parser.add_argument("-l", "--label", type=str, default="BraTS-GLI")
     return parser.parse_args()
 
@@ -62,6 +64,8 @@ def create_gandlf_input(
     gt_filepaths: list,
     out_file: str,
     subject_id_pattern: str,
+    add_missing_label: bool,
+    cohort_label: str,
 ):
     """Create 3-col CSV file to use as input to GaNDLF."""
     preds_df = pd.DataFrame(pred_filepaths, columns=["Prediction"])
@@ -70,10 +74,11 @@ def create_gandlf_input(
         preds_df.loc[:, "Prediction"], subject_id_pattern
     )[0]
 
-    # If missing, add cohort label to prediction SubjectID.
-    missing_labels = ~preds_df["SubjectID"].str.contains("BraTS-MET")
-    preds_df.loc[missing_labels, "SubjectID"] = "BraTS-MET-" + \
-        preds_df.loc[missing_labels, "SubjectID"]
+    if add_missing_label:
+        # If missing, add cohort label to prediction SubjectID.
+        missing_labels = ~preds_df["SubjectID"].str.contains(cohort_label)
+        preds_df.loc[missing_labels, "SubjectID"] = f"{cohort_label}-" + \
+            preds_df.loc[missing_labels, "SubjectID"]
 
     gt_df = pd.DataFrame(gt_filepaths, columns=["Target"])
     gt_df["Target"] = f"{GT_PARENT_DIR}/" + gt_df["Target"]
@@ -112,12 +117,12 @@ def extract_metrics(gandlf_results: str) -> pd.DataFrame:
         "global_bin_hd95",
         "global_bin_nsd",
     ])
-    tissues = "|".join([
-        "et",
-        "rc",
-        "tc",
-        "wt",
-    ])
+    # tissues = "|".join([
+    #     "et",
+    #     "rc",
+    #     "tc",
+    #     "wt",
+    # ])
     with open(gandlf_results) as f:
         metrics = json.load(f)
     df = pd.json_normalize(metrics.values())
@@ -125,7 +130,7 @@ def extract_metrics(gandlf_results: str) -> pd.DataFrame:
     res = (
         df.set_index("scan_id")
         .filter(regex=select_cols, axis=1)
-        .filter(regex=tissues, axis=1)
+        # .filter(regex=tissues, axis=1)
     )
     res.columns = [col.replace(".", "_") for col in res.columns]
     return res
@@ -157,6 +162,13 @@ def main(args):
         args.groundtruth_file,
         dest_path=GT_PARENT_DIR,
     )
+    if args.second_goldstandard_file:
+        truths.extend(
+            utils.inspect_archive(
+                args.second_goldstandard_file,
+                dest_path=GT_PARENT_DIR,
+            )
+        )
 
     gandlf_input_file = "tmp.csv"
     create_gandlf_input(
@@ -164,6 +176,8 @@ def main(args):
         truths,
         out_file=gandlf_input_file,
         subject_id_pattern=args.subject_id_pattern,
+        add_missing_label=(args.label == "BraTS-MET"),
+        cohort_label=args.label,
     )
 
     gandlf_output_file = "tmp.json"

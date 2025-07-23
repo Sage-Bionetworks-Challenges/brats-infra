@@ -17,6 +17,10 @@ inputs:
   type: File
 - id: goldstandard
   type: File
+- id: second_goldstandard
+  type: File?
+  inputBinding:
+    prefix: -g2
 - id: gandlf_config
   type: File
 - id: subject_id_pattern
@@ -42,7 +46,7 @@ outputs:
     outputEval: $(JSON.parse(self[0].contents)['submission_status'])
     loadContents: true
 
-baseCommand: score_met.py
+baseCommand: score_panoptica.py
 arguments:
 - prefix: --parent_id
   valueFrom: $(inputs.parent_id)
