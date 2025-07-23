@@ -66,6 +66,18 @@ steps:
         source: "#synapseConfig"
     out: []
 
+  get_task_entities:
+    doc: Get goldstandard and label based on task number
+    run: steps/get_task.cwl
+    in:
+      - id: queue
+        source: "#download_submission/evaluation_id"
+    out:
+      - id: gt_synid
+      - id: gt2_synid
+      - id: label
+      - id: config
+
   download_submission:
     doc: Download submission
     run: |-
@@ -88,7 +100,19 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        default: "syn64915944"
+        source: "#get_task_entities/gt_synid"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out:
+      - id: filepath
+
+  download_second_goldstandard:
+    doc: Download additional goldstandard (empty zipfile if not available)
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
+    in:
+      - id: synapseid
+        source: "#get_task_entities/gt2_synid"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -184,7 +208,7 @@ steps:
     doc: >
       Score submission; individual case scores will be uploaded to Synapse in
       a CSV while aggregate (mean) scores will be returned to the submitter
-    run: steps/met-score.cwl
+    run: steps/panoptica-score.cwl
     in:
       - id: parent_id
         source: "#submitterUploadSynId"
@@ -196,6 +220,8 @@ steps:
         source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
+      - id: second_goldstandard
+        source: "#download_second_goldstandard/filepath"
       - id: gandlf_config
         source: "#download_config/filepath"
       - id: label
