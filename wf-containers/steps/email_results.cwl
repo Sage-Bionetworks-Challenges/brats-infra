@@ -17,7 +17,7 @@ requirements:
       parser = argparse.ArgumentParser()
       parser.add_argument("-s", "--submissionid", required=True, help="Submission ID")
       parser.add_argument("-c", "--synapse_config", required=True, help="credentials file")
-      parser.add_argument("-d", "--docker_id", help="submission ID for MLCube Docker")
+      parser.add_argument("--status", help="validation status")
 
       args = parser.parse_args()
       syn = synapseclient.Synapse(configPath=args.synapse_config)
@@ -34,33 +34,26 @@ requirements:
 
       subject = f"Submission to '{evaluation.name}' "
       message = [f"Hello {name},\n\n"]
-      print(args.docker_id)
-      if args.docker_id == 'INVALID':
+      if args.status == 'INVALID':
         subject += "invalid"
         message.append(
-          f"<b>Your MLCube submission (ID {args.submissionid}) is invalid.</b> "
-          "We could not find a Docker image associated with your MLCube "
-          "config tarball. Please try again, and remember to use the "
-          "<u>same submission name</u> for your MLCube tarball and MLCube "
-          "Docker image.\n\n"
+          f"Your submission (ID {args.submissionid}) is not a Docker image. "
+          "Please try again."
         )
       else:
         subject += "accepted"
         message.append(
-          "Thank you for participating in the BraTS 2024 Challenge!\n\n"
-          f"<b>Your MLCube submission (ID: {args.submissionid}) has been "
-          "accepted!</b> 🎉 Starting next week, we will run your MLCube "
-          "against the unseen testing data, assuming you have also submitted "
-          "a short paper. If you did not submit a short paper, we will NOT "
-          "run your MLCube. Results will be announced at a later time.\n\n"
-          "Important note: we did <b>NOT run a compatibility test of your "
-          "MLCube</b>; your submission may be at risk to failing next week. "
-          "If you haven't yet, we highly encourage you to "
-          "<a href='https://www.synapse.org/Synapse:syn53708249/wiki/627758'>"
-          "locally test your MLCube's compatibility</a> against the sample "
-          "benchmark to catch possible errors. You may submit again if needed.\n\n"
+          "Thank you for participating in the BraTS-Lighthouse 2025 Challenge!\n\n"
+          "This email is to notify you that we have received your Docker image for "
+          "final evaluation.\n\n"
+          "<b>Important!: we did not run your submitted Docker model to verify "
+          "that it can run successfully</b>. Therefore, we highly encourage you to "
+          "<a href='https://www.synapse.org/Synapse:syn64153130/wiki/633742'>"
+          "locally run your Docker model</a> against the sample datasets to catch "
+          "possible errors, and submit again if needed."
         )
       message.append(
+        "\n\n"
         "Sincerely,\n"
         "BraTS Organizing Committee"
       )
@@ -90,12 +83,12 @@ arguments:
   valueFrom: $(inputs.submissionid)
 - prefix: -c
   valueFrom: $(inputs.synapse_config.path)
-- prefix: -d
+- prefix: --status
   valueFrom: $(inputs.status)
 
 hints:
   DockerRequirement:
-    dockerPull: sagebionetworks/synapsepythonclient:v2.7.2
+    dockerPull: sagebionetworks/synapsepythonclient:v4.9.0
 
 s:author:
 - class: s:Person
