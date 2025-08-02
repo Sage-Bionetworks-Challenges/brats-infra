@@ -45,7 +45,7 @@ requirements:
         message.append(
           "Thank you for participating in the BraTS-Lighthouse 2025 Challenge!\n\n"
           "This email is to notify you that we have received your Docker image for "
-          "final evaluation.\n\n"
+          f"final evaluation (submission ID {args.submissionid}).\n\n"
           "<b>Important!: we did not run your submitted Docker model to verify "
           "that it can run successfully</b>. Therefore, we highly encourage you to "
           "<a href='https://www.synapse.org/Synapse:syn64153130/wiki/633742'>"
@@ -96,7 +96,7 @@ s:author:
   s:email: verena.chung@sagebase.org
   s:name: Verena Chung
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats2023
+s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:

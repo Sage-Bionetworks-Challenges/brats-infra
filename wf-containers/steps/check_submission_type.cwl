@@ -67,7 +67,7 @@ s:author:
   s:email: verena.chung@sagebase.org
   s:name: Verena Chung
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats2023
+s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:
