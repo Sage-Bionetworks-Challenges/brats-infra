@@ -16,7 +16,6 @@ import multiprocessing
 import os
 import re
 
-
 import metrics_GLI
 import metrics_MEN
 import metrics_MEN_RT
@@ -154,6 +153,7 @@ def extract_metrics(df, label, scan_id):
 
 
 def score_one_prediction(data):
+    """Score a single prediction scan."""
     pred, label, mapping = data
 
     scan_id = re.search(r"(\d{4,5}(-\d{1,3})?)\.nii\.gz$", pred).group(1)
@@ -166,18 +166,18 @@ def score_one_prediction(data):
         results, _ = calculate_per_lesion(pred_file, scan_id, cohort, label)
         scan_scores = extract_metrics(results, label, scan_id)
     except ValueError:
-        scan_scores = pd.DataFrame(
-            {
-                "scan_id": [f"{label}-{scan_id}"],
-            }
-        ).set_index("scan_id")
+        scan_scores = pd.DataFrame({
+            "scan_id": [f"{label}-{scan_id}"],
+        }).set_index("scan_id")
     return scan_scores
 
 
 def score(pred_lst, label, mapping=None):
     """Compute and return scores for each scan."""
     data = [(pred, label, mapping) for pred in pred_lst]
-    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as pool:
+
+    max_workers_count = os.cpu_count()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers_count) as pool:
         results = pool.map(score_one_prediction, data)
         scores = [pred_score for pred_score in results]
     return pd.concat(scores).sort_values(by="scan_id")
@@ -242,7 +242,11 @@ def main(args):
         # Per organizer request: add penalty scores for cases where the
         # participant did not provide a prediction. The worst possible
         # scores are 337/374 for HD95 (task-dependent), and 0 for everything else.
-        gold_labels = {filename.replace("-seg.nii.gz", "") for filename in golds}
+        gold_labels = {
+            filename.replace("-seg.nii.gz", "").replace("_gtv.nii.gz", "")
+            for filename
+            in golds
+        }
         missing_scan_ids = gold_labels - set(results.index)
         if missing_scan_ids:
             penalty_scores = {
