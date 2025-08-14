@@ -57,12 +57,7 @@ def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
         normalization_tensor=voided_t1_data,
         mask=healthy_mask_data,
     )
-    return pd.DataFrame({
-        'MSE': [metrics.mse],
-        'PSNR': [metrics.psnr],
-        'PSNR_01': [metrics.psnr_01],
-        'SSIM': [metrics.ssim]
-    })
+    return pd.DataFrame([metrics])
 
 
 def score(gold_dir, pred_lst, label):
