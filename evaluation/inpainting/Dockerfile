@@ -1,4 +1,4 @@
-FROM bitnami/pytorch:2.0.1
+FROM bitnami/pytorch:2.8.0
 
 # Temporarily change to root user in order to create
 # the .synapseCache folder required by synapseclient.
@@ -11,5 +11,4 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY 2023_challenge/evaluation/evaluation_utils.py .
 COPY *.py .
