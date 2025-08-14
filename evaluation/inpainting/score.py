@@ -29,8 +29,6 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--goldstandard_file",
                         type=str, default="/goldstandard.zip")
-    parser.add_argument("-m", "--healthy_masks",
-                        type=str, default="/masks.zip")
     parser.add_argument("-o", "--output",
                         type=str, default="results.json")
     parser.add_argument("-l", "--label",
@@ -68,7 +66,7 @@ def score(gold_dir, pred_lst, label):
         mask = os.path.join(gold_dir, identifier,
                             f"{identifier}-mask-healthy.nii.gz")
         gold = os.path.join(gold_dir, identifier, f"{identifier}-t1n.nii.gz")
-        voided = os.path.join(gold_dir, identifier, f"{identifier}-t1n-void.nii.gz")
+        voided = os.path.join(gold_dir, identifier, f"{identifier}-t1n-voided.nii.gz")
         results = (
             calculate_metrics(pred, mask, gold, voided)
             .assign(scan_id=identifier)
@@ -94,6 +92,7 @@ def main():
                .drop(["count", "min", "max"]))
     results = pd.concat([results, metrics])
 
+    results.to_csv("all_scores.csv")
     syn = synapseclient.Synapse(configPath=args.synapse_config)
     syn.login(silent=True)
     csv = synapseclient.File("all_scores.csv", parent=args.parent_id)
