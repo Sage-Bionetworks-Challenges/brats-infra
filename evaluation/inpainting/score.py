@@ -11,8 +11,7 @@ import re
 import argparse
 import json
 
-import nibabel as nib
-import torch
+from inpainting.challenge_metrics_2023 import generate_metrics, read_nifti_to_tensor
 import pandas as pd
 import synapseclient
 
@@ -40,46 +39,44 @@ def get_args():
     return parser.parse_args()
 
 
-def calculate_metrics(result, mask, gold):
+def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
     """
     Run inpainting computation of prediction scan against
-    goldstandard and healthy mask.
+    goldstandard, healthy mask, and voided T1 scan.
     """
-    pred_img = nib.load(result)
-    pred = torch.Tensor(pred_img.get_fdata()).unsqueeze(0).unsqueeze(0)
 
-    # Inference mask
-    mask_img = nib.load(mask)
-    mask = torch.Tensor(mask_img.get_fdata()).bool().unsqueeze(0).unsqueeze(0)
-
-    # Ground truth
-    t1n_img = nib.load(gold)
-    t1n = torch.Tensor(t1n_img.get_fdata()).unsqueeze(0).unsqueeze(0)
+    prediction_data = read_nifti_to_tensor(pred)
+    healthy_mask_data = read_nifti_to_tensor(healthy_mask).bool()
+    reference_t1_data = read_nifti_to_tensor(ref_t1n)
+    voided_t1_data = read_nifti_to_tensor(voided_t1n)
 
     # Compute metrics
-    mse, psnr, psnr_01, ssim = evaluation_utils.compute_metrics(
-        gt_image=t1n,
-        prediction=pred,
-        mask=mask)
+    metrics = generate_metrics(
+        prediction=prediction_data,
+        target=reference_t1_data,
+        normalization_tensor=voided_t1_data,
+        mask=healthy_mask_data,
+    )
     return pd.DataFrame({
-        'MSE': [mse],
-        'PSNR': [psnr],
-        'PSNR_01': [psnr_01],
-        'SSIM': [ssim]
+        'MSE': [metrics.mse],
+        'PSNR': [metrics.psnr],
+        'PSNR_01': [metrics.psnr_01],
+        'SSIM': [metrics.ssim]
     })
 
 
-def score(gold_dir, mask_dir, pred_lst, label):
+def score(gold_dir, pred_lst, label):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"\d{5}-\d{3}", pred).group()
         identifier = f"{label}-{scan_id}"
-        mask = os.path.join(mask_dir, identifier,
+        mask = os.path.join(gold_dir, identifier,
                             f"{identifier}-mask-healthy.nii.gz")
         gold = os.path.join(gold_dir, identifier, f"{identifier}-t1n.nii.gz")
+        voided = os.path.join(gold_dir, identifier, f"{identifier}-t1n-void.nii.gz")
         results = (
-            calculate_metrics(pred, mask, gold)
+            calculate_metrics(pred, mask, gold, voided)
             .assign(scan_id=identifier)
             .set_index("scan_id")
         )
@@ -91,12 +88,10 @@ def main():
     """Main function."""
     args = get_args()
     preds = utils.inspect_zip(args.predictions_file)
-    golds = utils.inspect_zip(args.goldstandard_file, pattern="t1n")
-    masks = utils.inspect_zip(args.healthy_masks)
+    golds = utils.inspect_zip(args.goldstandard_file)
 
     gold_dir = os.path.normpath(golds[0]).split(os.sep)[0]
-    mask_dir = os.path.normpath(masks[0]).split(os.sep)[0]
-    results = score(gold_dir, mask_dir, preds, args.label)
+    results = score(gold_dir, preds, args.label)
     cases_evaluated = len(results.index)
 
     metrics = (results
