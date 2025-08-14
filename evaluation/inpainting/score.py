@@ -16,7 +16,6 @@ import pandas as pd
 import synapseclient
 
 import utils
-import evaluation_utils
 
 
 def get_args():
@@ -95,10 +94,6 @@ def main():
                .drop(["count", "min", "max"]))
     results = pd.concat([results, metrics])
 
-    # CSV file of scores for all scans, hiding the automatic PSNR score 
-    # ('PSNR') and renaming the fixed PSNR ('PSNR_01') to PSNR.
-    # ^^^ requested by the challenge organizers
-    (results.drop('PSNR', axis=1).rename({'PSNR_01':'PSNR'}, axis=1).to_csv("all_scores.csv"))
     syn = synapseclient.Synapse(configPath=args.synapse_config)
     syn.login(silent=True)
     csv = synapseclient.File("all_scores.csv", parent=args.parent_id)
@@ -108,16 +103,16 @@ def main():
     with open(args.output, "w") as out:
         res_dict = {**results
                     .loc["mean"]
-                    .rename({'MSE': "MSE_mean",
-                             'PSNR': "PSNR_mean",
-                             'PSNR_01': "PSNR_01_mean",
-                             'SSIM': "SSIM_mean"}),
+                    .rename({'mse': "mse_mean",
+                             'psnr': "psnr_mean",
+                             'psnr_01': "psnr_01_mean",
+                             'ssim': "ssim_mean"}),
                     **results
                     .loc["std"]
-                    .rename({'MSE': "MSE_sd",
-                             'PSNR': "PSNR_sd",
-                             'PSNR_01': "PSNR_01_sd",
-                             'SSIM': "SSIM_sd"}),
+                    .rename({'mse': "mse_mean",
+                             'psnr': "psnr_mean",
+                             'psnr_01': "psnr_01_mean",
+                             'ssim': "ssim_mean"}),
                     "cases_evaluated": cases_evaluated,
                     "submission_scores": csv.id,
                     "submission_status": "SCORED"}
