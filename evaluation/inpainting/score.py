@@ -29,6 +29,8 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--goldstandard_file",
                         type=str, default="/goldstandard.zip")
+    parser.add_argument("-m", "--healthy_masks_file",
+                        type=str, default="/masks.zip")
     parser.add_argument("-o", "--output",
                         type=str, default="results.json")
     parser.add_argument("-l", "--label",
@@ -57,14 +59,13 @@ def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
     return pd.DataFrame([metrics])
 
 
-def score(gold_dir, pred_lst, label):
+def score(gold_dir, mask_dir, pred_lst, label):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"\d{5}-\d{3}", pred).group()
         identifier = f"{label}-{scan_id}"
-        mask = os.path.join(gold_dir, identifier,
-                            f"{identifier}-mask-healthy.nii.gz")
+        mask = os.path.join(mask_dir, identifier, f"{identifier}-mask-healthy.nii.gz")
         gold = os.path.join(gold_dir, identifier, f"{identifier}-t1n.nii.gz")
         voided = os.path.join(gold_dir, identifier, f"{identifier}-t1n-voided.nii.gz")
         results = (
@@ -80,10 +81,12 @@ def main():
     """Main function."""
     args = get_args()
     preds = utils.inspect_archive(args.predictions_file)
-    golds = utils.inspect_archive(args.goldstandard_file)
+    golds = utils.inspect_archive(args.goldstandard_file, pattern="t1n")
+    masks = utils.inspect_archive(args.healthy_masks_file)
 
     gold_dir = os.path.normpath(golds[0]).split(os.sep)[0]
-    results = score(gold_dir, preds, args.label)
+    mask_dir = os.path.normpath(masks[0]).split(os.sep)[0]
+    results = score(gold_dir, mask_dir, preds, args.label)
     cases_evaluated = len(results.index)
 
     metrics = (
@@ -100,7 +103,7 @@ def main():
     csv = syn.store(csv)
 
     # Results file for annotations.
-    with open(args.output, "w", encoding="utf-8") as out:
+    with open(args.output, "w") as out:
         res_dict = {
             **results.loc["mean"].rename(
                 {
