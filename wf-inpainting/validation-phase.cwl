@@ -30,11 +30,11 @@ inputs:
 outputs: []
 
 steps:
-  organizers_log_access:
+  01_set_submitter_folder_permissions:
     doc: >
       Give challenge organizers `download` permissions to the submission logs
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/set_permissions.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/set_permissions.cwl
     in:
       - id: entityid
         source: "#submitterUploadSynId"
@@ -46,10 +46,10 @@ steps:
         source: "#synapseConfig"
     out: []
 
-  download_submission:
+  01_download_submission:
     doc: Download submission
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/get_submission.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/get_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -62,7 +62,7 @@ steps:
       - id: evaluation_id
       - id: results
 
-  download_masks:
+  02_download_masks:
     doc: Download healthy masks
     run: |-
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
@@ -74,7 +74,7 @@ steps:
     out:
       - id: filepath
 
-  download_goldstandard:
+  02_download_goldstandard:
     doc: Download goldstandard
     run: |-
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
@@ -86,16 +86,16 @@ steps:
     out:
       - id: filepath
 
-  validate:
+  03_validate:
     doc: Validate submission, which should be a tar/zip of NIfTI files
     run: steps/validate.cwl
     in:
       - id: input_file
-        source: "#download_submission/filepath"
+        source: "#01_download_submission/filepath"
       - id: goldstandard
-        source: "#download_masks/filepath"
+        source: "#02_download_masks/filepath"
       - id: entity_type
-        source: "#download_submission/entity_type"
+        source: "#01_download_submission/entity_type"
       - id: pred_pattern
         default: "(\\d{5}-\\d{3})-t1n-inference"
       - id: gold_pattern
@@ -105,35 +105,35 @@ steps:
       - id: status
       - id: invalid_reasons
   
-  send_validation_results:
+  04_send_validation_results:
     doc: Send email of the validation results to the submitter
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/validate_email.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/validate_email.cwl
     in:
       - id: submissionid
         source: "#submissionId"
       - id: synapse_config
         source: "#synapseConfig"
       - id: status
-        source: "#validate/status"
+        source: "#03_validate/status"
       - id: invalid_reasons
-        source: "#validate/invalid_reasons"
+        source: "#03_validate/invalid_reasons"
       # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
         default: true
     out: [finished]
 
-  add_validation_annots:
+  04_add_validation_annots:
     doc: >
       Add `submission_status` and `submission_errors` annotations to the
       submission
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/annotate_submission.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#validate/results"
+        source: "#03_validate/results"
       - id: to_public
         default: true
       - id: force
@@ -142,23 +142,23 @@ steps:
         source: "#synapseConfig"
     out: [finished]
 
-  check_validation_status:
+  05_check_validation_status:
     doc: >
       Check the validation status of the submission; if 'INVALID', throw an
       exception to stop the workflow - this will prevent the attempt of
       scoring invalid predictions file (which will then result in errors)
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/check_status.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
     in:
       - id: status
-        source: "#validate/status"
+        source: "#03_validate/status"
       - id: previous_annotation_finished
-        source: "#add_validation_annots/finished"
+        source: "#04_add_validation_annots/finished"
       - id: previous_email_finished
-        source: "#send_validation_results/finished"
+        source: "#04_send_validation_results/finished"
     out: [finished]
 
-  score:
+  06_score:
     doc: >
       Score submission; individual case scores will be uploaded to Synapse in
       a CSV while aggregate (mean) scores will be returned to the submitter
@@ -169,21 +169,21 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: input_file
-        source: "#download_submission/filepath"
+        source: "#01_download_submission/filepath"
       - id: masks
-        source: "#download_masks/filepath"
+        source: "#02_download_masks/filepath"
       - id: goldstandard
-        source: "#download_goldstandard/filepath"
+        source: "#02_download_goldstandard/filepath"
         # default:
         #   class: File
         #   location: "/home/vchung/gold.tar.gz"
       - id: check_validation_finished 
-        source: "#check_validation_status/finished"
+        source: "#05_check_validation_status/finished"
     out:
       - id: results
       - id: status
       
-  send_score_results:
+  07_send_score_results:
     doc: >
       Send email of the scores to the submitter, as well as the link to the
       all_scores CSV file on Synapse
@@ -194,21 +194,21 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: results
-        source: "#score/results"
+        source: "#06_score/results"
       - id: private_annotations
         default: ["PSNR_mean", "PSNR_sd"]
     out: [finished]
 
-  add_score_annots:
+  07_add_score_annots:
     doc: >
       Update `submission_status` and add the scoring metric annotations
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/annotate_submission.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#score/results"
+        source: "#06_score/results"
       - id: to_public
         default: true
       - id: force
@@ -216,7 +216,22 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: previous_annotation_finished
-        source: "#add_validation_annots/finished"
+        source: "#04_add_validation_annots/finished"
+    out: [finished]
+
+  08_check_score_status:
+    doc: >
+      Check the scoring status of the submission; if 'INVALID', throw an
+      exception so that final status is 'INVALID' instead of 'ACCEPTED'
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
+    in:
+      - id: status
+        source: "#06_score/status"
+      - id: previous_annotation_finished
+        source: "#07_add_score_annots/finished"
+      - id: previous_email_finished
+        source: "#07_send_score_results/finished"
     out: [finished]
  
 s:author:
