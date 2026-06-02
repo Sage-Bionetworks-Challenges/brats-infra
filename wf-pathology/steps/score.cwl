@@ -49,7 +49,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/pathology-evaluation:v2.0.0
+    dockerPull: docker.synapse.org/syn53708126/pathology-evaluation:v2.1.0
 
 s:author:
 - class: s:Person

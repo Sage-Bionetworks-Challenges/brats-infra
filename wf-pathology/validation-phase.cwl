@@ -1,35 +1,67 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
 class: Workflow
-label: BraTS 2024 - Tasks 10 workflow
+label: BraTS 2026 - Task 5 workflow
 
 requirements:
   - class: StepInputExpressionRequirement
 
 inputs:
+  # ------------------------------------------------------------------------------
+  # SynapseWorkflowOrchestrator inputs - do not remove or modify.
+  # ------------------------------------------------------------------------------
   adminUploadSynId:
-    label: Synapse Folder ID accessible by an admin
+    label: synID to folder on Synapse that is downloadable by admin only
     type: string
   submissionId:
     label: Submission ID
     type: int
   submitterUploadSynId:
-    label: Synapse Folder ID accessible by the submitter
+    label: synID to folder on Synapse that is downloadable by submitter and admin
     type: string
   synapseConfig:
-    label: filepath to .synapseConfig file
+    label: Abstolute filepath to .synapseConfig file
     type: File
   workflowSynapseId:
-    label: Synapse File ID that links to the workflow
+    label: synID to workflow file
     type: string
-  organizers:
+
+  # ------------------------------------------------------------------------------
+  # Core challenge configuration - specific to this challenge.
+  # ------------------------------------------------------------------------------
+  organizersId:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
+  groundtruthSynId:
+    label: synID for the groundtruth file on Synapse
+    type: string
+    default: "syn75095491"
+  configSynId:
+    label: synID for the GaNDLF config file on Synapse
+    type: string
+    default: "syn68144257"
   pattern:
     label: Regex pattern for valid SubjectIDs
     type: string
-    default: "BraTSPath_Val.*jpg$"
+    default: "^val_\\w+$"
+  penalty_label:
+    label: Label for the penalty region in the gold standard
+    type: int
+    default: 10
+  
+  # ------------------------------------------------------------------------------
+  # Optional challenge configuration.
+  # ------------------------------------------------------------------------------
+  errors_only:
+    label: Send email notifications only for errors (no notification for valid submissions)
+    type: boolean
+    default: true
+  private_annotations:
+    label: Annotations to be withheld from participants
+    type: string[]
+    default: ["submission_errors"]
+
 
 outputs: []
 
@@ -43,7 +75,7 @@ steps:
       - id: entityid
         source: "#submitterUploadSynId"
       - id: principalid
-        source: "#organizers"
+        source: "#organizersId"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
@@ -72,7 +104,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn68152189"
+        source: "#groundtruthSynId"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -84,7 +116,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn68144257"  # TODO
+        source: "#configSynId"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -103,7 +135,7 @@ steps:
       - id: min_label
         default: 0
       - id: max_label
-        default: 8
+        default: 9
     out:
       - id: results
       - id: status
@@ -122,7 +154,6 @@ steps:
         source: "#03_validate/status"
       - id: invalid_reasons
         source: "#03_validate/invalid_reasons"
-      # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
         default: true
     out: [finished]
@@ -173,7 +204,7 @@ steps:
       - id: gandlf_config
         source: "#02_download_config/filepath"
       - id: penalty_label
-        default: 9
+        source: "#penalty_label"
       - id: subject_id_pattern
         source: "#pattern"
       - id: check_validation_finished
@@ -193,9 +224,6 @@ steps:
         source: "#synapseConfig"
       - id: results
         source: "#06_score/results"
-      # OPTIONAL: add annotations to be withheld from participants to `[]`
-      # - id: private_annotations
-      #   default: []
     out: []
 
   07_add_score_annots:
