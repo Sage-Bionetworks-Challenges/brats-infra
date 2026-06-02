@@ -1,7 +1,7 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
 class: CommandLineTool
-label: Score Segmentations Lesion-wise
+label: Score Segmentations with Panoptica
 
 requirements:
 - class: InlineJavascriptRequirement
@@ -9,16 +9,14 @@ requirements:
 inputs:
 - id: parent_id
   type: string
+- id: private_parent_id
+  type: string
 - id: synapse_config
   type: File
 - id: input_file
   type: File
 - id: goldstandard
   type: File
-- id: second_goldstandard
-  type: File?
-  inputBinding:
-    prefix: -g2
 - id: label
   type: string?
   inputBinding:
@@ -42,6 +40,8 @@ baseCommand: score.py
 arguments:
 - prefix: --parent_id
   valueFrom: $(inputs.parent_id)
+- prefix: --private_parent_id
+  valueFrom: $(inputs.private_parent_id)
 - prefix: -s
   valueFrom: $(inputs.synapse_config.path)
 - prefix: -p
@@ -53,7 +53,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/lesionwise-evaluation:2025-v1.1.1
+    dockerPull: docker.synapse.org/syn53708126/segmentation-evaluation:v1.0.0
 
 s:author:
 - class: s:Person

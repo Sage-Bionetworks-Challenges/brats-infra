@@ -7,22 +7,29 @@ requirements:
   - class: StepInputExpressionRequirement
 
 inputs:
+  # ------------------------------------------------------------------------------
+  # SynapseWorkflowOrchestrator inputs - do not remove or modify.
+  # ------------------------------------------------------------------------------
   adminUploadSynId:
-    label: Synapse Folder ID accessible by an admin
+    label: synID to folder on Synapse that is downloadable by admin only
     type: string
   submissionId:
     label: Submission ID
     type: int
   submitterUploadSynId:
-    label: Synapse Folder ID accessible by the submitter
+    label: synID to folder on Synapse that is downloadable by submitter and admin
     type: string
   synapseConfig:
-    label: filepath to .synapseConfig file
+    label: Abstolute filepath to .synapseConfig file
     type: File
   workflowSynapseId:
-    label: Synapse File ID that links to the workflow
+    label: synID to workflow file
     type: string
-  organizers:
+
+  # ------------------------------------------------------------------------------
+  # Core challenge configuration - specific to this challenge.
+  # ------------------------------------------------------------------------------
+  organizersId:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
@@ -34,6 +41,18 @@ inputs:
     label: Regex pattern for valid prediction filenames
     type: string
     default: "(\\d{4,5}-\\d{1,3})[-_](seg|gtv)"
+  
+  # ------------------------------------------------------------------------------
+  # Optional challenge configuration.
+  # ------------------------------------------------------------------------------
+  errors_only:
+    label: Send email notifications only for errors (no notification for valid submissions)
+    type: boolean
+    default: true
+  private_annotations:
+    label: Annotations to be withheld from participants
+    type: string[]
+    default: ["submission_errors"]
 
 outputs: []
 
@@ -47,7 +66,23 @@ steps:
       - id: entityid
         source: "#submitterUploadSynId"
       - id: principalid
-        source: "#organizers"
+        source: "#organizersId"
+      - id: permissions
+        valueFrom: "download"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out: []
+
+  01_set_private_folder_permissions:
+    doc: >
+      Give challenge organizers `download` permissions to the score files
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/set_permissions.cwl
+    in:
+      - id: entityid
+        source: "#adminUploadSynId"
+      - id: principalid
+        source: "#organizersId"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
@@ -78,8 +113,7 @@ steps:
         source: "#01_download_submission/evaluation_id"
     out:
       - id: gt_synid
-      - id: gt2_synid
-      - id: label
+      - id: cohort_label
 
   03_download_goldstandard:
     doc: Download goldstandard
@@ -93,18 +127,6 @@ steps:
     out:
       - id: filepath
 
-  03_download_second_goldstandard:
-    doc: Download additional goldstandard (empty zipfile if not available)
-    run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
-    in:
-      - id: synapseid
-        source: "#02_get_task_entities/gt2_synid"
-      - id: synapse_config
-        source: "#synapseConfig"
-    out:
-      - id: filepath
-
   04_validate:
     doc: Validate submission, which should be a tar/zip of NIfTI files
     run: steps/validate.cwl
@@ -113,8 +135,6 @@ steps:
         source: "#01_download_submission/filepath"
       - id: goldstandard
         source: "#03_download_goldstandard/filepath"
-      - id: second_goldstandard
-        source: "#03_download_second_goldstandard/filepath"
       - id: entity_type
         source: "#01_download_submission/entity_type"
       - id: pred_pattern
@@ -122,7 +142,7 @@ steps:
       - id: gold_pattern
         source: "#gold_pattern"
       - id: label
-        source: "#02_get_task_entities/label"
+        source: "#02_get_task_entities/cohort_label"
     out:
       - id: results
       - id: status
@@ -141,7 +161,6 @@ steps:
         source: "#04_validate/status"
       - id: invalid_reasons
         source: "#04_validate/invalid_reasons"
-      # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
         default: true
     out: [finished]
@@ -189,16 +208,16 @@ steps:
     in:
       - id: parent_id
         source: "#submitterUploadSynId"
+      - id: private_parent_id
+        source: "#adminUploadSynId"
       - id: synapse_config
         source: "#synapseConfig"
       - id: input_file
         source: "#01_download_submission/filepath"
       - id: goldstandard
         source: "#03_download_goldstandard/filepath"
-      - id: second_goldstandard
-        source: "#03_download_second_goldstandard/filepath"
       - id: label
-        source: "#02_get_task_entities/label"
+        source: "#02_get_task_entities/cohort_label"
       - id: check_validation_finished
         source: "#06_check_validation_status/finished"
     out:
@@ -217,9 +236,8 @@ steps:
         source: "#synapseConfig"
       - id: results
         source: "#07_score/results"
-      # OPTIONAL: add annotations to be withheld from participants to `[]`
-      # - id: private_annotations
-      #   default: []
+      - id: private_annotations
+        source: "#private_annotations"
     out: [finished]
 
   08_add_score_annots:

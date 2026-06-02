@@ -11,10 +11,6 @@ inputs:
   type: File
 - id: goldstandard
   type: File
-- id: second_goldstandard
-  type: File?
-  inputBinding:
-    prefix: -g2
 - id: entity_type
   type: string
 - id: pred_pattern
@@ -61,7 +57,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/lesionwise-evaluation:2025-v1.1.1
+    dockerPull: docker.synapse.org/syn53708126/segmentation-evaluation:v1.0.0
 
 s:author:
 - class: s:Person

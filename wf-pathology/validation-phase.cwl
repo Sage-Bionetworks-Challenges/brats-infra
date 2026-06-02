@@ -82,6 +82,22 @@ steps:
         source: "#synapseConfig"
     out: []
 
+  01_set_private_folder_permissions:
+    doc: >
+      Give challenge organizers `download` permissions to the score files
+    run: |-
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/set_permissions.cwl
+    in:
+      - id: entityid
+        source: "#adminUploadSynId"
+      - id: principalid
+        source: "#organizers"
+      - id: permissions
+        valueFrom: "download"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out: []
+  
   01_download_submission:
     doc: Download submission
     run: |-
@@ -224,6 +240,8 @@ steps:
         source: "#synapseConfig"
       - id: results
         source: "#06_score/results"
+      - id: private_annotations
+        source: "#private_annotations"
     out: []
 
   07_add_score_annots:
