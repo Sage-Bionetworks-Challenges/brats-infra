@@ -44,7 +44,7 @@ inputs:
   pattern:
     label: Regex pattern for valid SubjectIDs
     type: string
-    default: "^val_\\w+$"
+    default: "val_\\w+"
   penalty_label:
     label: Label for the penalty region in the gold standard
     type: int
