@@ -232,7 +232,7 @@ steps:
   07_send_score_results:
     doc: Send email of the scores to the submitter
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/score_email.cwl
+      ../shared/email_results.cwl
     in:
       - id: submissionid
         source: "#submissionId"

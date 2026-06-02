@@ -57,9 +57,9 @@ requirements:
               subject = f"Submission to '{evaluation.name}' scored!"
               message = (
                   f"Hello {name},\n\n"
-                  f"Your submission (id: {sub.id}) has been scored. "
-                  f"Metric averages:\n\n{metrics}\n\n"
-                  f"Individual scores are available here: {csv_url}"
+                  f"Your submission (id: {sub.id}) has been scored. Here are your scores:\n\n"
+                  f"{metrics}\n\n"
+                  f"You can find your scores file here: {csv_url}"
               )
           else:
               subject = f"Submission to '{evaluation.name}' not scored"
