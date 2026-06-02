@@ -107,7 +107,13 @@ arguments:
 - prefix: -r
   valueFrom: $(inputs.results.path)
 - prefix: -p
-  valueFrom: $(inputs.private_annotations)
+  valueFrom: |
+    ${
+      if (!inputs.private_annotations || inputs.private_annotations.length === 0) {
+        return null;
+      }
+      return inputs.private_annotations;
+    }
 
 hints:
   DockerRequirement:
