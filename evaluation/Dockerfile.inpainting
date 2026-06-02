@@ -8,7 +8,8 @@ USER $CONTAINER_USER_I
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY utils.py .
+COPY inpainting/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY *.py .
+COPY inpainting/*.py .

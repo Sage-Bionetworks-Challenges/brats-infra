@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+# synapseclient requires a writable cache directory
+RUN mkdir /.synapseCache
+
+WORKDIR /usr/local/bin/
+
+COPY utils.py .
+COPY segmentation/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY segmentation/*.py .
