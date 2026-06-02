@@ -60,7 +60,7 @@ inputs:
   private_annotations:
     label: Annotations to be withheld from participants
     type: string[]
-    default: ["submission_errors", "PSNR_mean", "PSNR_sd"]
+    default: ["PSNR_mean", "PSNR_sd"]
 
 outputs: []
 
