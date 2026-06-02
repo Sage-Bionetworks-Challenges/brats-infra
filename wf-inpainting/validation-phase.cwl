@@ -74,7 +74,7 @@ steps:
       - id: entityid
         source: "#submitterUploadSynId"
       - id: principalid
-        source: "#organizers"
+        source: "#organizersId"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
@@ -90,7 +90,7 @@ steps:
       - id: entityid
         source: "#adminUploadSynId"
       - id: principalid
-        source: "#organizers"
+        source: "#organizersId"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
