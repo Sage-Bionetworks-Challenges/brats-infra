@@ -114,7 +114,7 @@ Pathology | MCC, F1, sensitivity, specificity | All 4 metrics
 --|--|--
 Segmentation | _TBD_ | _TBD_
 Inpainting | SSIM, PSNR, MSE | All 3 metrics
-Pathology | MCC, F1, sensitivity, specificity | All 4 metrics
+Pathology | Accuracy, AUROC, MCC, F1, Sensitivity, Specificity | All 6 metrics
 
 ---
 
