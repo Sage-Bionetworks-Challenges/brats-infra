@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validation script for BraTS 2024 - Pathology.
+"""Validation script for BraTS pathology task.
 
 Predictions file must be a 2-col CSV with two columns:
     - SubjectID: string

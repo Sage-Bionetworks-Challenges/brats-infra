@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
-"""Validation script for BraTS inpainting task.
+"""Validation script for BraTS segmentation tasks.
 
 Predictions file must be a tarball or zipped archive of NIfTI files
 (*.nii.gz). Each NIfTI file must have an ID in its filename.
 """
 
-import os
-import re
 import argparse
 import json
+import os
+import re
 
 import nibabel as nib
 import utils
-
-DIM = (240, 240, 155)
-ORIGIN = [
-    [-1.0, 0.0, 0.0, -0.0],
-    [0.0, -1.0, 0.0, 239.0],
-    [0.0, 0.0, 1.0, 0.0],
-    [0.0, 0.0, 0.0, 1.0],
-]
 
 
 def get_args():
@@ -29,48 +21,47 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--goldstandard_file",
                         type=str, default="/goldstandard.zip")
+    parser.add_argument("-g2", "--second_goldstandard_file",
+                        type=str)
     parser.add_argument("-e", "--entity_type",
                         type=str, required=True)
     parser.add_argument("-t", "--tmp_dir",
                         type=str, default="tmpdir")
     parser.add_argument("-o", "--output", type=str)
     parser.add_argument("--pred_pattern", type=str,
-                        default="(\d{5}-\d{3})")
+                        default="(\\d{5}-\\d{3})")
     parser.add_argument("--gold_pattern", type=str,
-                        default="(\d{5}-\d{3})-seg")
+                        default="(\\d{5}-\\d{3})-seg")
+    parser.add_argument("-l", "--label",
+                        type=str, default="BraTS-GLI")
     return parser.parse_args()
 
 
-def _check_header(img):
-    """Check if img has dimension: 240x240x155 and origin: [0, -239, 0]."""
-    error = ""
-    if (
-        img.header.get_data_shape() != DIM
-        or not (img.header.get_qform() == ORIGIN).all()
-    ):
-        error = (
-            "One or more predictions is not a NIfTI file with "
-            "dimension of 240x240x155 or origin at [0, -239, 0]."
-        )
-    return error
+def _check_dimension(img):
+    if len(img.shape) != 3:
+        return "One or more predictions is not a 3D image."
+    return ""
 
 
-def check_file_contents(img, parent):
+def check_file_contents(img, parent, label):
     """Check that the file can be opened as NIfTI."""
     try:
         img = nib.load(os.path.join(parent, img))
-        return _check_header(img)
+        return _check_dimension(img)
     except nib.filebasedimages.ImageFileError:
-        return "One or more predictions cannot be opened as a NIfTI file."
+        return "One or more predictions cannot be opened as a " "NIfTI file."
 
 
-def validate_file_format(preds, parent):
+def validate_file_format(preds, parent, label):
     """Check that all files are NIfTI files (*.nii.gz)."""
     error = []
     if all(pred.endswith(".nii.gz") for pred in preds):
-
         # Ensure that all file contents are NIfTI with correct params.
-        if not all((res := check_file_contents(pred, parent)) == "" for pred in preds):
+        if not all(
+            (res := check_file_contents(pred, parent, label)) == ""
+            for pred
+            in preds
+        ):
             error = [res]
     else:
         error = ["Not all files in the archive are NIfTI files (*.nii.gz)."]
@@ -120,11 +111,16 @@ def main():
     if entity_type != "FileEntity":
         invalid_reasons.append(f"Submission must be a File, not {entity_type}.")
     else:
-        preds = utils.inspect_zip(args.predictions_file, path=args.tmp_dir)
-        golds = utils.inspect_zip(args.goldstandard_file,
-                                  unzip=False, path=args.tmp_dir)
+        preds = utils.inspect_archive(args.predictions_file, path=args.tmp_dir)
+        golds = utils.inspect_archive(args.goldstandard_file, extract=False)
+        if args.second_goldstandard_file:
+            golds.extend(
+                utils.inspect_archive(args.second_goldstandard_file, extract=False)
+            )
         if preds:
-            invalid_reasons.extend(validate_file_format(preds, args.tmp_dir))
+            invalid_reasons.extend(
+                validate_file_format(preds, args.tmp_dir, args.label)
+            )
             invalid_reasons.extend(
                 validate_filenames(preds, golds, args.pred_pattern, args.gold_pattern)
             )

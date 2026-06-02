@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Scoring script for Pathology Task.
+"""Scoring script for BraTS pathology task.
 
 Run classification computation and return:
+  - Accuracy
+  - AUROC
   - MCC
   - F1
   - Sensitivity
-  - Specifity
+  - Specificity
 """
 
 import argparse
@@ -117,7 +119,13 @@ def main():
             for metric, score in metrics.items()
             if metric in METRICS_TO_RETURN
         }
-        out.write(json.dumps({**results, "submission_status": "SCORED"}))
+        json.dump(
+            {
+                **results,
+                "submission_status": "SCORED",
+            },
+            out,
+        )
 
 
 if __name__ == "__main__":

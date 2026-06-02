@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scoring script for Task 8.
+"""Scoring script for BraTS inpainting task.
 
 Compute the following metrics for the inpainted images:
   - Structural similarity index measure (SSIM)
@@ -100,7 +100,7 @@ def main():
     csv = syn.store(csv)
 
     # Results file for annotations.
-    with open(args.output, "w") as out:
+    with open(args.output, "w", encoding="utf-8") as out:
         res_dict = {
             **results.loc["mean"].rename(
                 {
@@ -123,7 +123,7 @@ def main():
             "submission_status": "SCORED",
         }
         res_dict = {k: v for k, v in res_dict.items() if not pd.isna(v)}
-        out.write(json.dumps(res_dict))
+        json.dump(res_dict, out)
 
 
 if __name__ == "__main__":
