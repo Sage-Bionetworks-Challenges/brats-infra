@@ -49,7 +49,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: docker.synapse.org/syn53708126/inpainting-evaluation:2023-v1.1.0
+    dockerPull: docker.synapse.org/syn53708126/inpainting-evaluation:v1.0.1
 
 s:author:
 - class: s:Person

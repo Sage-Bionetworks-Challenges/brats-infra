@@ -1,31 +1,66 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
 class: Workflow
-label: BraTS 2024 - Task 8 workflow
+label: BraTS 2026 - Task 4 workflow
 
 requirements:
   - class: StepInputExpressionRequirement
 
 inputs:
+  # ------------------------------------------------------------------------------
+  # SynapseWorkflowOrchestrator inputs - do not remove or modify.
+  # ------------------------------------------------------------------------------
   adminUploadSynId:
-    label: Synapse Folder ID accessible by an admin
+    label: synID to folder on Synapse that is downloadable by admin only
     type: string
   submissionId:
     label: Submission ID
     type: int
   submitterUploadSynId:
-    label: Synapse Folder ID accessible by the submitter
+    label: synID to folder on Synapse that is downloadable by submitter and admin
     type: string
   synapseConfig:
-    label: filepath to .synapseConfig file
+    label: Abstolute filepath to .synapseConfig file
     type: File
   workflowSynapseId:
-    label: Synapse File ID that links to the workflow
+    label: synID to workflow file
     type: string
-  organizers:
+
+  # ------------------------------------------------------------------------------
+  # Core challenge configuration - specific to this challenge.
+  # ------------------------------------------------------------------------------
+  organizersId:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
+  groundtruthSynId:
+    label: synID for the groundtruth file on Synapse
+    type: string
+    default: "syn51514110"
+  healthyMasksSynId:
+    label: synID for the healthy masks file on Synapse
+    type: string
+    default: "syn51685080"
+  pred_pattern:
+    label: Regex pattern for valid prediction filenames
+    type: string
+    default: "(\\d{5}-\\d{3})-t1n-inference"
+  gold_pattern:
+    label: Regex pattern for valid gold standard filenames
+    type: string
+    default: "(\\d{5}-\\d{3})-mask-healthy"
+  
+  # ------------------------------------------------------------------------------
+  # Optional challenge configuration.
+  # ------------------------------------------------------------------------------
+  errors_only:
+    label: Send email notifications only for errors (no notification for valid submissions)
+    type: boolean
+    default: true
+  private_annotations:
+    label: Annotations to be withheld from participants
+    type: string[]
+    default: ["submission_errors", "PSNR_mean", "PSNR_sd"]
 
 outputs: []
 
@@ -68,7 +103,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn51685080"
+        source: "#healthyMasksSynId"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -80,7 +115,7 @@ steps:
       https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
-        valueFrom: "syn51514110"
+        source: "#groundtruthSynId"
       - id: synapse_config
         source: "#synapseConfig"
     out:
@@ -97,9 +132,9 @@ steps:
       - id: entity_type
         source: "#01_download_submission/entity_type"
       - id: pred_pattern
-        default: "(\\d{5}-\\d{3})-t1n-inference"
+        source: "#pred_pattern"
       - id: gold_pattern
-        default: "(\\d{5}-\\d{3})-mask-healthy"
+        source: "#gold_pattern"
     out:
       - id: results
       - id: status
@@ -118,9 +153,8 @@ steps:
         source: "#03_validate/status"
       - id: invalid_reasons
         source: "#03_validate/invalid_reasons"
-      # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
-        default: true
+        source: "#errors_only"
     out: [finished]
 
   04_add_validation_annots:
@@ -196,7 +230,7 @@ steps:
       - id: results
         source: "#06_score/results"
       - id: private_annotations
-        default: ["PSNR_mean", "PSNR_sd"]
+        source: "#private_annotations"
     out: [finished]
 
   07_add_score_annots:
