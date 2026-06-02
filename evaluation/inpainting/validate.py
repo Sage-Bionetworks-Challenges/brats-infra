@@ -4,6 +4,7 @@
 Predictions file must be a tarball or zipped archive of NIfTI files
 (*.nii.gz). Each NIfTI file must have an ID in its filename.
 """
+
 import os
 import re
 import argparse
@@ -13,10 +14,12 @@ import nibabel as nib
 import utils
 
 DIM = (240, 240, 155)
-ORIGIN = [[-1.,   0.,   0.,  -0.],
-          [0.,  -1.,   0., 239.],
-          [0.,   0.,   1.,   0.],
-          [0.,   0.,   0.,   1.]]
+ORIGIN = [
+    [-1.0, 0.0, 0.0, -0.0],
+    [0.0, -1.0, 0.0, 239.0],
+    [0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0],
+]
 
 
 def get_args():
@@ -41,10 +44,14 @@ def get_args():
 def _check_header(img):
     """Check if img has dimension: 240x240x155 and origin: [0, -239, 0]."""
     error = ""
-    if img.header.get_data_shape() != DIM or \
-            not (img.header.get_qform() == ORIGIN).all():
-        error = ("One or more predictions is not a NIfTI file with "
-                 "dimension of 240x240x155 or origin at [0, -239, 0].")
+    if (
+        img.header.get_data_shape() != DIM
+        or not (img.header.get_qform() == ORIGIN).all()
+    ):
+        error = (
+            "One or more predictions is not a NIfTI file with "
+            "dimension of 240x240x155 or origin at [0, -239, 0]."
+        )
     return error
 
 
@@ -54,8 +61,7 @@ def check_file_contents(img, parent):
         img = nib.load(os.path.join(parent, img))
         return _check_header(img)
     except nib.filebasedimages.ImageFileError:
-        return ("One or more predictions cannot be opened as a "
-                "NIfTI file.")
+        return "One or more predictions cannot be opened as a NIfTI file."
 
 
 def validate_file_format(preds, parent):
@@ -93,12 +99,15 @@ def validate_filenames(preds, golds, pred_pattern, gold_pattern):
         }
         unknown_ids = set(scan_ids) - gold_case_ids
         if unknown_ids:
-            error.append(
-                f"Unknown scan IDs found: {', '.join(sorted(unknown_ids))}")
+            error.append(f"Unknown scan IDs found: {', '.join(sorted(unknown_ids))}")
     except AttributeError:
-        error = [("Not all filenames in the archive follow the expected "
-                  "naming format. Please check the Submission Tutorial "
-                  "of the task you're submitting to for more details.")]
+        error = [
+            (
+                "Not all filenames in the archive follow the expected "
+                "naming format. Please check the Submission Tutorial "
+                "of the task you're submitting to for more details."
+            )
+        ]
     return error
 
 
@@ -109,19 +118,16 @@ def main():
 
     entity_type = args.entity_type.split(".")[-1]
     if entity_type != "FileEntity":
-        invalid_reasons.append(
-            f"Submission must be a File, not {entity_type}."
-        )
+        invalid_reasons.append(f"Submission must be a File, not {entity_type}.")
     else:
         preds = utils.inspect_zip(args.predictions_file, path=args.tmp_dir)
         golds = utils.inspect_zip(args.goldstandard_file,
                                   unzip=False, path=args.tmp_dir)
         if preds:
             invalid_reasons.extend(validate_file_format(preds, args.tmp_dir))
-            invalid_reasons.extend(validate_filenames(
-                preds, golds,
-                args.pred_pattern, args.gold_pattern
-            ))
+            invalid_reasons.extend(
+                validate_filenames(preds, golds, args.pred_pattern, args.gold_pattern)
+            )
         else:
             invalid_reasons.append(
                 "Submission must be a tarball or zipped archive "

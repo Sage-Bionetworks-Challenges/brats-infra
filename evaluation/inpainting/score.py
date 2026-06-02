@@ -79,17 +79,18 @@ def score(gold_dir, pred_lst, label):
 def main():
     """Main function."""
     args = get_args()
-    preds = utils.inspect_zip(args.predictions_file)
-    golds = utils.inspect_zip(args.goldstandard_file)
+    preds = utils.inspect_archive(args.predictions_file)
+    golds = utils.inspect_archive(args.goldstandard_file)
 
     gold_dir = os.path.normpath(golds[0]).split(os.sep)[0]
     results = score(gold_dir, preds, args.label)
     cases_evaluated = len(results.index)
 
-    metrics = (results
-               .describe()
-               .rename(index={'25%': "25quantile", '50%': "median", '75%': "75quantile"})
-               .drop(["count", "min", "max"]))
+    metrics = (
+        results.describe()
+        .rename(index={"25%": "25quantile", "50%": "median", "75%": "75quantile"})
+        .drop(["count", "min", "max"])
+    )
     results = pd.concat([results, metrics])
 
     results.to_csv("all_scores.csv")
@@ -100,21 +101,27 @@ def main():
 
     # Results file for annotations.
     with open(args.output, "w") as out:
-        res_dict = {**results
-                    .loc["mean"]
-                    .rename({'mse': "mse_mean",
-                             'psnr': "psnr_mean",
-                             'psnr_01': "psnr_01_mean",
-                             'ssim': "ssim_mean"}),
-                    **results
-                    .loc["std"]
-                    .rename({'mse': "mse_mean",
-                             'psnr': "psnr_mean",
-                             'psnr_01': "psnr_01_mean",
-                             'ssim': "ssim_mean"}),
-                    "cases_evaluated": cases_evaluated,
-                    "submission_scores": csv.id,
-                    "submission_status": "SCORED"}
+        res_dict = {
+            **results.loc["mean"].rename(
+                {
+                    "mse": "mse_mean",
+                    "psnr": "psnr_mean",
+                    "psnr_01": "psnr_01_mean",
+                    "ssim": "ssim_mean",
+                }
+            ),
+            **results.loc["std"].rename(
+                {
+                    "mse": "mse_mean",
+                    "psnr": "psnr_mean",
+                    "psnr_01": "psnr_01_mean",
+                    "ssim": "ssim_mean",
+                }
+            ),
+            "cases_evaluated": cases_evaluated,
+            "submission_scores": csv.id,
+            "submission_status": "SCORED",
+        }
         res_dict = {k: v for k, v in res_dict.items() if not pd.isna(v)}
         out.write(json.dumps(res_dict))
 
