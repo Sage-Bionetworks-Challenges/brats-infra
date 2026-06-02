@@ -117,7 +117,7 @@ arguments:
 
 hints:
   DockerRequirement:
-    dockerPull: sagebionetworks/synapsepythonclient:v2.7.2
+    dockerPull: sagebionetworks/synapsepythonclient:v3.1.1
 
 s:author:
 - class: s:Person
