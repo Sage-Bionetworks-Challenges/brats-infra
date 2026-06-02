@@ -91,7 +91,7 @@ steps:
       - id: entityid
         source: "#adminUploadSynId"
       - id: principalid
-        source: "#organizers"
+        source: "#organizersId"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
