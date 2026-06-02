@@ -47,20 +47,21 @@ requirements:
               raise ValueError("score.py must return 'submission_status' in results JSON")
 
           if status == "SCORED":
-              csv_id = annots.pop("submission_scores")
+              csv_id = annots.pop("submission_scores", None)
               annots.pop("submission_status")
               for key in args.private_annotations:
                   annots.pop(key, None)
 
               metrics = "\n".join(f"  {k}: {v}" for k, v in annots.items())
-              csv_url = f"https://www.synapse.org/#!Synapse:{csv_id}"
               subject = f"Submission to '{evaluation.name}' scored!"
               message = (
                   f"Hello {name},\n\n"
                   f"Your submission (id: {sub.id}) has been scored. Here are your scores:\n\n"
-                  f"{metrics}\n\n"
-                  f"You can find your scores file here: {csv_url}"
+                  f"{metrics}"
               )
+              if csv_id:
+                  csv_url = f"https://www.synapse.org/#!Synapse:{csv_id}"
+                  message += f"\n\nA breakdown of your scores by case is available here: {csv_url}"
           else:
               subject = f"Submission to '{evaluation.name}' not scored"
               message = (
