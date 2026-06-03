@@ -63,7 +63,7 @@ def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
     return pd.DataFrame([metrics])
 
 
-def score(gold_dir, mask_dir, pred_lst, label):
+def score(pred_lst, label):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
@@ -71,8 +71,14 @@ def score(gold_dir, mask_dir, pred_lst, label):
         identifier = f"{label}-{scan_id}"
         mask = os.path.join(MASK_DIR, f"{identifier}-mask-healthy.nii.gz")
         gold = os.path.join(GOLD_DIR, f"{identifier}-t1n.nii.gz")
+        # voided = os.path.join(GOLD_DIR, f"{identifier}-t1n-voided.nii.gz")  // Not available in validation dataset
+
         results = (
-            calculate_metrics(pred, mask, gold, voided)
+            calculate_metrics(
+                pred=os.path.join(PRED_DIR, pred),
+                healthy_mask=mask,
+                ref_t1n=gold,
+            )
             .assign(scan_id=identifier)
             .set_index("scan_id")
         )
