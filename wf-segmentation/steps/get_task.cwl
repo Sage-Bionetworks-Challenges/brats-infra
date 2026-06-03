@@ -16,8 +16,6 @@ outputs:
   type: string
 - id: cohort_label
   type: string
-- id: mapping_synid
-  type: string?
 expression: |2-
 
   ${
@@ -26,7 +24,7 @@ expression: |2-
     if (inputs.queue == "9619537") {
       return {
         gt_synid: "syn64915944",
-        cohort_label: "BraTS-MET"
+        cohort_label: "BraTS-MET",
       };
     } 
     // BraTS-PED
@@ -40,7 +38,6 @@ expression: |2-
     else if (inputs.queue == "9619539") {
       return {
         gt_synid: "syn61455588",
-        // mapping_synid: "syn61464265",  // possibly unneeded
         cohort_label: "BraTS-GoAT",
       }
     }
