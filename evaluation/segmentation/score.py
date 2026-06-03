@@ -19,22 +19,13 @@ import synapseclient
 import utils
 
 PRED_PARENT_DIR = "pred"
-GT_PARENT_DIR = "gt"
+GT_PARENT_DIR = "ref"
 
-# Maps cohort label → brats-evaluate --config argument
-EVALUATE_CONFIG = {
+# Maps cohort label → config for brats-evaluate
+EVALUATION_CONFIG = {
     "BraTS-MET": "mets",
-    "BraTS-GLI": "gli",
     "BraTS-PED": "ped",
     "BraTS-GoAT": "GoAT",
-    "BraTS-MEN-RT": "MenRT",
-    "BraTS-MEN": "MenPre",
-}
-
-# Maps cohort label → brats-parse-metrics subcommand
-# ("mets" for MET-specific stats; "seg" for all others)
-PARSE_SUBCOMMAND = {
-    "BraTS-MET": "mets",
 }
 
 
@@ -72,25 +63,32 @@ def run_evaluate(config, ref_path, pred_path, output_json):
     )
 
 
-def run_parse_metrics(subcommand, json_path, output_csv):
+def run_parse_metrics(cohort, json_path, output_csv):
     """Run brats-parse-metrics to produce per-subject summary CSV."""
+    match cohort:
+        case "BraTS-MET":
+            subcommand = ["mets", "--vol_threshold", 27, "--overlap_threshold", 0.2]
+        case "BraTS-PED" | "BraTS-GoAT":
+            subcommand = ["seg"]
+        case _:
+            raise ValueError(f"Unexpected cohort label: {cohort}")
+
     subprocess.check_call(
         [
             "brats-parse-metrics",
-            subcommand,
             "--json_path",
             json_path,
             "--output_csv_path",
             output_csv,
         ]
+        + subcommand
     )
 
 
 def main():
     """Main function."""
     args = get_args()
-    eval_config = EVALUATE_CONFIG.get(args.label, args.label.lower())
-    parse_subcommand = PARSE_SUBCOMMAND.get(args.label, "seg")
+    eval_config = EVALUATION_CONFIG.get(args.label, args.label.lower())
 
     utils.inspect_archive(args.predictions_file, path=PRED_PARENT_DIR)
     utils.inspect_archive(args.goldstandard_file, path=GT_PARENT_DIR)
@@ -99,7 +97,7 @@ def main():
     summary_csv = "all_scores.csv"
 
     run_evaluate(eval_config, GT_PARENT_DIR, PRED_PARENT_DIR, metrics_json)
-    run_parse_metrics(parse_subcommand, metrics_json, summary_csv)
+    run_parse_metrics(args.label, metrics_json, summary_csv)
 
     syn = synapseclient.Synapse(configPath=args.synapse_config)
     syn.login(silent=True)
@@ -127,7 +125,7 @@ def main():
                 **mean_metrics,
                 "cases_evaluated": cases_evaluated,
                 "submission_scores": csv_file.id,
-                "full_panoptica_scores": private_file.id,
+                "summary_json": private_file.id,
                 "submission_status": "SCORED",
             },
             out,
