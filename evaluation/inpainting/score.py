@@ -125,10 +125,10 @@ def main():
             ),
             **results.loc["std"].rename(
                 {
-                    "mse": "mse_mean",
-                    "psnr": "psnr_mean",
-                    "psnr_01": "psnr_01_mean",
-                    "ssim": "ssim_mean",
+                    "mse": "mse_std",
+                    "psnr": "psnr_std",
+                    "psnr_01": "psnr_01_std",
+                    "ssim": "ssim_std",
                 }
             ),
             "cases_evaluated": cases_evaluated,
