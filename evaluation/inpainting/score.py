@@ -17,6 +17,10 @@ import synapseclient
 
 import utils
 
+GOLD_DIR = "ref"
+MASK_DIR = "masks"
+PRED_DIR = "pred"
+
 
 def get_args():
     """Set up command-line interface and get arguments."""
@@ -65,9 +69,8 @@ def score(gold_dir, mask_dir, pred_lst, label):
     for pred in pred_lst:
         scan_id = re.search(r"\d{5}-\d{3}", pred).group()
         identifier = f"{label}-{scan_id}"
-        mask = os.path.join(mask_dir, identifier, f"{identifier}-mask-healthy.nii.gz")
-        gold = os.path.join(gold_dir, identifier, f"{identifier}-t1n.nii.gz")
-        voided = os.path.join(gold_dir, identifier, f"{identifier}-t1n-voided.nii.gz")
+        mask = os.path.join(MASK_DIR, f"{identifier}-mask-healthy.nii.gz")
+        gold = os.path.join(GOLD_DIR, f"{identifier}-t1n.nii.gz")
         results = (
             calculate_metrics(pred, mask, gold, voided)
             .assign(scan_id=identifier)
@@ -80,13 +83,11 @@ def score(gold_dir, mask_dir, pred_lst, label):
 def main():
     """Main function."""
     args = get_args()
-    preds = utils.inspect_archive(args.predictions_file)
-    golds = utils.inspect_archive(args.goldstandard_file, pattern="t1n")
-    masks = utils.inspect_archive(args.healthy_masks_file)
+    preds = utils.inspect_archive(args.predictions_file, path=PRED_DIR)
+    utils.inspect_archive(args.goldstandard_file, path=GOLD_DIR, pattern="t1n")
+    utils.inspect_archive(args.healthy_masks_file, path=MASK_DIR)
 
-    gold_dir = os.path.normpath(golds[0]).split(os.sep)[0]
-    mask_dir = os.path.normpath(masks[0]).split(os.sep)[0]
-    results = score(gold_dir, mask_dir, preds, args.label)
+    results = score(preds, args.label)
     cases_evaluated = len(results.index)
 
     metrics = (
