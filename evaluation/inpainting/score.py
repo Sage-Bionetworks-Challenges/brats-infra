@@ -42,7 +42,7 @@ def get_args():
     return parser.parse_args()
 
 
-def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
+def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n=None):
     """
     Run inpainting computation of prediction scan against
     goldstandard, healthy mask, and voided T1 scan.
@@ -51,7 +51,10 @@ def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n):
     prediction_data = read_nifti_to_tensor(pred)
     healthy_mask_data = read_nifti_to_tensor(healthy_mask).bool()
     reference_t1_data = read_nifti_to_tensor(ref_t1n)
-    voided_t1_data = read_nifti_to_tensor(voided_t1n)
+    if voided_t1n is not None:
+        voided_t1_data = read_nifti_to_tensor(voided_t1n)
+    else:
+        voided_t1_data = None
 
     # Compute metrics
     metrics = generate_metrics(
