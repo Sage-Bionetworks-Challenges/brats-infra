@@ -28,14 +28,14 @@ expression: |2-
       };
     } 
     // BraTS-PED
-    else if (inputs.queue == "9619538") {
+    else if (inputs.queue == "9619683") {
       return {
         gt_synid: "syn60969497",
         cohort_label: "BraTS-PED",
       }
     }
     // BraTS-GoAT
-    else if (inputs.queue == "9619683") {
+    else if (inputs.queue == "9619539") {
       return {
         gt_synid: "syn61455588",
         cohort_label: "BraTS-GoAT",
