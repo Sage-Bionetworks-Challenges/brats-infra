@@ -115,7 +115,7 @@ def main():
     run_gandlf(args.gandlf_config, gandlf_input_file, gandlf_output_file)
 
     # Upload full GaNDLF metrics JSON to the private folder.
-    syn = synapseclient.Synapse(configPath=args.gandlf_config)
+    syn = synapseclient.Synapse(configPath=args.synapse_config)
     syn.login(silent=True)
     private_file = synapseclient.File(gandlf_output_file, parent=args.parent_id)
     private_file = syn.store(private_file)       
