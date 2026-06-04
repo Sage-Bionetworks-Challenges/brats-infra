@@ -67,7 +67,7 @@ def run_parse_metrics(cohort, json_path, output_csv):
     """Run brats-parse-metrics to produce per-subject summary CSV."""
     match cohort:
         case "BraTS-MET":
-            subcommand = ["mets", "--vol_threshold", 27, "--overlap_threshold", 0.2]
+            subcommand = ["mets", "--vol_threshold", "27", "--overlap_threshold", "0.2"]
         case "BraTS-PED" | "BraTS-GoAT":
             subcommand = ["seg"]
         case _:
