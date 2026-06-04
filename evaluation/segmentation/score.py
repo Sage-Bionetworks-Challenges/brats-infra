@@ -76,12 +76,14 @@ def run_parse_metrics(cohort, json_path, output_csv):
     subprocess.check_call(
         [
             "brats-parse-metrics",
+        ]
+        + subcommand
+        + [
             "--json_path",
             json_path,
             "--output_csv_path",
             output_csv,
         ]
-        + subcommand
     )
 
 
