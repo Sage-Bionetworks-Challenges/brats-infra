@@ -113,7 +113,6 @@ def main():
     csv_file = syn.store(csv_file)
 
     df = pd.read_csv(summary_csv)
-    cases_evaluated = len(df) - 3  # subtract the mean, std, and median summary rows
     mean_row = df[df.iloc[:, 0] == "mean"].iloc[0]
     mean_metrics = {
         col: float(mean_row[col])
@@ -125,7 +124,6 @@ def main():
         json.dump(
             {
                 **mean_metrics,
-                "cases_evaluated": cases_evaluated,
                 "submission_scores": csv_file.id,
                 "summary_json": private_file.id,
                 "submission_status": "SCORED",
