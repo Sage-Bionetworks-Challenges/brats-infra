@@ -7,6 +7,10 @@ requirements:
 - class: InlineJavascriptRequirement
 
 inputs:
+- id: parent_id
+  type: string
+- id: synapse_config
+  type: File
 - id: input_file
   type: File
 - id: goldstandard
@@ -34,6 +38,10 @@ outputs:
 
 baseCommand: score.py
 arguments:
+- prefix: --parent_id
+  valueFrom: $(inputs.parent_id)
+- prefix: -s
+  valueFrom: $(inputs.synapse_config.path)
 - prefix: -p
   valueFrom: $(inputs.input_file.path)
 - prefix: -g

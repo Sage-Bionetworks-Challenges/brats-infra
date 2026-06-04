@@ -15,6 +15,7 @@ import json
 import subprocess
 
 import pandas as pd
+import synapseclient
 
 METRICS_TO_RETURN = [
     "mcc",
@@ -29,6 +30,7 @@ METRICS_TO_RETURN = [
 def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
+    parser.add_argument("--parent_id", type=str, required=True)
     parser.add_argument(
         "-p", "--predictions_file", type=str, default="/predictions.csv"
     )
@@ -87,7 +89,7 @@ def create_gandlf_input(pred_file, gold_file, out_file, penalty_label, pattern):
     if penalty_label:
         res = gold.merge(pred, how="left", on="SubjectID").fillna(penalty_label)
 
-        # Reassign coltype to int, since NaN values will conver
+        # Reassign coltype to int, since NaN values will convert
         # coltype to float.
         res["Prediction"] = res["Prediction"].astype(int)
     else:
@@ -108,12 +110,18 @@ def main():
         pattern=args.subject_id_pattern,
     )
 
-    gandlf_output_file = "tmp.json"
+    gandlf_output_file = "gandlf_metrics.json"
     run_gandlf(args.gandlf_config, gandlf_input_file, gandlf_output_file)
-    with open(gandlf_output_file, encoding="utf-8") as f:
-        metrics = json.load(f)
 
-    with open(args.output, "w", encoding="utf-8") as out:
+    # Upload full GaNDLF metrics JSON to the private folder.
+    syn = synapseclient.Synapse(configPath=args.gandlf_config)
+    syn.login(silent=True)
+    private_file = synapseclient.File(gandlf_output_file, parent=args.parent_id)
+    private_file = syn.store(private_file)       
+
+    with open(gandlf_output_file, encoding="utf-8") as f, \
+         open(args.output, "w", encoding="utf-8") as out:
+        metrics = json.load(f)
         results = {
             metric: score
             for metric, score in metrics.items()
@@ -123,6 +131,7 @@ def main():
             {
                 **results,
                 "submission_status": "SCORED",
+                "summary_json": private_file.id,
             },
             out,
         )

@@ -60,7 +60,7 @@ inputs:
   private_annotations:
     label: Annotations to be withheld from participants
     type: string[]
-    default: []
+    default: ["summary_json"]
 
 
 outputs: []
@@ -213,6 +213,10 @@ steps:
     doc: Score submission
     run: steps/score.cwl
     in:
+      - id: parent_id
+        source: "#adminUploadSynId"
+      - id: synapse_config
+        source: "#synapseConfig"
       - id: input_file
         source: "#01_download_submission/filepath"
       - id: goldstandard
