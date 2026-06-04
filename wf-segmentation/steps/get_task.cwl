@@ -21,7 +21,7 @@ expression: |2-
   ${
 
     // BraTS-MET
-    if (inputs.queue == "9619683") {
+    if (inputs.queue == "9619537") {
       return {
         gt_synid: "syn64915944",
         cohort_label: "BraTS-MET",
