@@ -52,7 +52,7 @@ inputs:
   private_annotations:
     label: Annotations to be withheld from participants
     type: string[]
-    default: []
+    default: ["summary_json"]
 
 outputs: []
 
