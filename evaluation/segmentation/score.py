@@ -9,9 +9,7 @@ to compute panoptica-based segmentation metrics:
 
 import argparse
 import json
-import os
 import subprocess
-import tempfile
 
 import pandas as pd
 import synapseclient
