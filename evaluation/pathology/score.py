@@ -31,6 +31,7 @@ def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--parent_id", type=str, required=True)
+    parser.add_argument("-s", "--synapse_config", type=str, default="/.synapseConfig")
     parser.add_argument(
         "-p", "--predictions_file", type=str, default="/predictions.csv"
     )
