@@ -33,14 +33,6 @@ inputs:
     label: User or team ID for challenge organizers
     type: string
     default: "3466984"
-  pred_pattern:
-    label: Regex pattern for valid prediction filenames
-    type: string
-    default: "(\\d{4,5}-\\d{1,3})"
-  gold_pattern:
-    label: Regex pattern for valid prediction filenames
-    type: string
-    default: "(\\d{4,5}-\\d{1,3})[-_](seg|gtv)"
   
   # ------------------------------------------------------------------------------
   # Optional challenge configuration.
@@ -114,6 +106,8 @@ steps:
     out:
       - id: gt_synid
       - id: cohort_label
+      - id: pred_pattern
+      - id: gold_pattern
 
   03_download_goldstandard:
     doc: Download goldstandard
@@ -138,9 +132,9 @@ steps:
       - id: entity_type
         source: "#01_download_submission/entity_type"
       - id: pred_pattern
-        source: "#pred_pattern"
+        source: "#02_get_task_entities/pred_pattern"
       - id: gold_pattern
-        source: "#gold_pattern"
+        source: "#02_get_task_entities/gold_pattern"
       - id: label
         source: "#02_get_task_entities/cohort_label"
     out:
