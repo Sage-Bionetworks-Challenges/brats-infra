@@ -38,6 +38,21 @@ steps:
       - id: results
       - id: status
 
+  check_early_queue:
+    doc: Check if submitter has already submitted to the early access queue.
+    run: steps/check_early_queue.cwl
+    in:
+      - id: submissionid
+        source: "#submissionId"
+      - id: synapse_config
+        source: "#synapseConfig"
+      - id: previous_status
+        source: "#check_submission_type/status"
+    out:
+      - id: results
+      - id: status
+      - id: submission_errors
+
   send_email:
     doc: Send email notification to the submitter.
     run: steps/email_results.cwl
