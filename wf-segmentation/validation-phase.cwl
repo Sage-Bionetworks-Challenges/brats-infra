@@ -189,8 +189,7 @@ steps:
       Check the validation status of the submission; if 'INVALID', throw an
       exception to stop the workflow - this will prevent the attempt of
       scoring invalid predictions file (which will then result in errors)
-    run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
+    run: ../shared/check_status.cwl
     in:
       - id: status
         source: "#04_validate/status"
@@ -264,8 +263,7 @@ steps:
     doc: >
       Check the scoring status of the submission; if 'INVALID', throw an
       exception so that final status is 'INVALID' instead of 'ACCEPTED'
-    run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
+    run: ../shared/check_status.cwl
     in:
       - id: status
         source: "#07_score/status"
