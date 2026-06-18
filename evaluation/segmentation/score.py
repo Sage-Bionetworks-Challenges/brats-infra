@@ -7,6 +7,7 @@ to compute panoptica-based segmentation metrics:
   - Instance-level TP, FP, FN, F1
 """
 
+from pathlib import Path
 import argparse
 import json
 import subprocess
@@ -106,25 +107,31 @@ def main():
     private_file = synapseclient.File(metrics_json, parent=args.private_parent_id)
     private_file = syn.store(private_file)
 
-    # Upload per-subject summary CSV to the submitter folder.
-    csv_file = synapseclient.File(summary_csv, parent=args.parent_id)
-    csv_file = syn.store(csv_file)
+    # Upload per-subject summary CSV to the submitter folder (if available).
+    if Path(summary_csv).is_file():
+        csv_file = synapseclient.File(summary_csv, parent=args.parent_id)
+        csv_file = syn.store(csv_file)
 
-    df = pd.read_csv(summary_csv)
-    mean_row = df[df.iloc[:, 0] == "mean"].iloc[0]
-    mean_metrics = {
-        col: float(mean_row[col])
-        for col in df.columns[1:]  # skip subject_id column
-        if pd.notna(mean_row[col])
-    }
-
+        df = pd.read_csv(summary_csv)
+        mean_row = df[df.iloc[:, 0] == "mean"].iloc[0]
+        mean_metrics = {
+            col: float(mean_row[col])
+            for col in df.columns[1:]  # skip subject_id column
+            if pd.notna(mean_row[col])
+        }
+        status = "SCORED"
+    else:
+        csv_file = None
+        mean_metrics = {}
+        status = "NOT_SCORED"
+        
     with open(args.output, "w", encoding="utf-8") as out:
         json.dump(
             {
                 **mean_metrics,
-                "submission_scores": csv_file.id,
+                "submission_scores": csv_file.id if csv_file else None,
                 "summary_json": private_file.id,
-                "submission_status": "SCORED",
+                "submission_status": status,
             },
             out,
         )
