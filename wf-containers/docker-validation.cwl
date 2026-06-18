@@ -1,7 +1,7 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
 class: Workflow
-label: BraTS 2024 - MLCube workflow
+label: BraTS 2026 - docker validation workflow
 
 requirements:
   - class: StepInputExpressionRequirement
@@ -53,7 +53,7 @@ steps:
   annotate_submission:
     doc: Annotate submission with `submission_status` results.
     run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.0/cwl/annotate_submission.cwl
+      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -69,8 +69,7 @@ steps:
 
   set_invalid_status:
     doc: Set status to INVALID if corresponding Docker image not found
-    run: |-
-      https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/check_status.cwl
+    run: ../shared/check_status.cwl
     in:
       - id: status
         source: "#check_submission_type/status"
@@ -86,7 +85,7 @@ s:author:
   s:email: verena.chung@sagebase.org
   s:name: Verena Chung
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats2023
+s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:

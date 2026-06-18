@@ -43,13 +43,13 @@ requirements:
       else:
         subject += "accepted"
         message.append(
-          "Thank you for participating in the BraTS-Lighthouse 2025 Challenge!\n\n"
+          "Thank you for participating in the BraTS 2026 Challenge!\n\n"
           "This email is to notify you that we have received your Docker image for "
           f"final evaluation (submission ID {args.submissionid}).\n\n"
           "<b>Important!: we did not run your submitted Docker model to verify "
           "that it can run successfully</b>. Therefore, we highly encourage you to "
-          "<a href='https://www.synapse.org/Synapse:syn64153130/wiki/633742'>"
-          "locally run your Docker model</a> against the sample datasets to catch "
+          "<a href='https://challenges.synapse.org/Challenges/DetailsPage/News?id=syn74274097'>"
+          "locally run your Docker model</a> against the validation datasets to catch "
           "possible errors, and submit again if needed."
         )
       message.append(
@@ -60,7 +60,8 @@ requirements:
       syn.sendMessage(
         userIds=[participantid],
         messageSubject=subject,
-        messageBody="".join(message))
+        messageBody="".join(message),
+      )
 
 inputs:
 - id: submissionid
@@ -93,7 +94,7 @@ hints:
 s:author:
 - class: s:Person
   s:identifier: https://orcid.org/0000-0002-5622-7998
-  s:email: verena.chung@sagebase.org
+  s:email: verena.chung633742@sagebase.org
   s:name: Verena Chung
 
 s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/brats-infra
