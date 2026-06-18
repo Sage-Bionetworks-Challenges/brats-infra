@@ -18,6 +18,7 @@ requirements:
       parser.add_argument("-s", "--submissionid", required=True, help="Submission ID")
       parser.add_argument("-c", "--synapse_config", required=True, help="credentials file")
       parser.add_argument("--status", help="validation status")
+      parser.add_argument("--submission_errors", default="", help="submission error details")
 
       args = parser.parse_args()
       syn = synapseclient.Synapse(configPath=args.synapse_config)
@@ -36,10 +37,13 @@ requirements:
       message = [f"Hello {name},\n\n"]
       if args.status == 'INVALID':
         subject += "invalid"
-        message.append(
-          f"Your submission (ID {args.submissionid}) is not a Docker image. "
-          "Please try again."
-        )
+        if args.submission_errors:
+          message.append(args.submission_errors)
+        else:
+          message.append(
+            f"Your submission (ID {args.submissionid}) is not a Docker image. "
+            "Please try again."
+          )
       else:
         subject += "accepted"
         message.append(
@@ -70,6 +74,9 @@ inputs:
   type: File
 - id: status
   type: string
+- id: submission_errors
+  type: string
+  default: ""
 
 outputs:
 - id: finished
@@ -86,6 +93,8 @@ arguments:
   valueFrom: $(inputs.synapse_config.path)
 - prefix: --status
   valueFrom: $(inputs.status)
+- prefix: --submission_errors
+  valueFrom: $(inputs.submission_errors)
 
 hints:
   DockerRequirement:

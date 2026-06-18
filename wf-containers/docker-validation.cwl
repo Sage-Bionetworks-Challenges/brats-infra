@@ -62,7 +62,9 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: status
-        source: "#check_submission_type/status"
+        source: "#check_early_queue/status"
+      - id: submission_errors
+        source: "#check_early_queue/submission_errors"
     out: [finished]
 
   annotate_submission:
@@ -73,7 +75,7 @@ steps:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#check_submission_type/results"
+        source: "#check_early_queue/results"
       - id: to_public
         default: true
       - id: force
@@ -87,7 +89,7 @@ steps:
     run: ../shared/check_status.cwl
     in:
       - id: status
-        source: "#check_submission_type/status"
+        source: "#check_early_queue/status"
       - id: previous_annotation_finished
         source: "#annotate_submission/finished"
       - id: previous_email_finished
