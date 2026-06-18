@@ -120,10 +120,12 @@ def main():
             if pd.notna(mean_row[col])
         }
         status = "SCORED"
+        submission_errors = None
     else:
         csv_file = None
         mean_metrics = {}
         status = "NOT_SCORED"
+        submission_errors = "Panoptica scores not available, likely due to spatial mismatches"
         
     with open(args.output, "w", encoding="utf-8") as out:
         json.dump(
@@ -132,6 +134,7 @@ def main():
                 "submission_scores": csv_file.id if csv_file else None,
                 "summary_json": private_file.id,
                 "submission_status": status,
+                "submission_errors": submission_errors,
             },
             out,
         )
