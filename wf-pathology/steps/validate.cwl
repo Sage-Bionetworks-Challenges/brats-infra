@@ -8,7 +8,7 @@ requirements:
 
 inputs:
 - id: input_file
-  type: File
+  type: File?
 - id: entity_type
   type: string
 - id: subject_id_pattern
