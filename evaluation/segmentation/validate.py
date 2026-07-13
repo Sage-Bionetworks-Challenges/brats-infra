@@ -21,8 +21,6 @@ def get_args():
                         type=str, default="/predictions.zip")
     parser.add_argument("-g", "--goldstandard_file",
                         type=str, default="/goldstandard.zip")
-    parser.add_argument("-g2", "--second_goldstandard_file",
-                        type=str)
     parser.add_argument("-e", "--entity_type",
                         type=str, required=True)
     parser.add_argument("-t", "--tmp_dir",
@@ -113,10 +111,6 @@ def main():
     else:
         preds = utils.inspect_archive(args.predictions_file, path=args.tmp_dir)
         golds = utils.inspect_archive(args.goldstandard_file, extract=False)
-        if args.second_goldstandard_file:
-            golds.extend(
-                utils.inspect_archive(args.second_goldstandard_file, extract=False)
-            )
         if preds:
             invalid_reasons.extend(
                 validate_file_format(preds, args.tmp_dir, args.label)

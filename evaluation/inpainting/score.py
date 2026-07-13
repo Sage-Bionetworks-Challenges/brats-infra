@@ -8,6 +8,7 @@ Compute the following metrics for the inpainted images:
 """
 import os
 import re
+import tempfile
 import argparse
 import json
 
@@ -66,19 +67,19 @@ def calculate_metrics(pred, healthy_mask, ref_t1n, voided_t1n=None):
     return pd.DataFrame([metrics])
 
 
-def score(pred_lst, label):
+def score(pred_lst, label, pred_dir=PRED_DIR, gold_dir=GOLD_DIR, mask_dir=MASK_DIR):
     """Compute and return scores for each scan."""
     scores = []
     for pred in pred_lst:
         scan_id = re.search(r"\d{5}-\d{3}", pred).group()
         identifier = f"{label}-{scan_id}"
-        mask = os.path.join(MASK_DIR, f"{identifier}-mask-healthy.nii.gz")
-        gold = os.path.join(GOLD_DIR, f"{identifier}-t1n.nii.gz")
-        # voided = os.path.join(GOLD_DIR, f"{identifier}-t1n-voided.nii.gz")  // Not available in validation dataset
+        mask = os.path.join(mask_dir, f"{identifier}-mask-healthy.nii.gz")
+        gold = os.path.join(gold_dir, f"{identifier}-t1n.nii.gz")
+        # voided = os.path.join(gold_dir, f"{identifier}-t1n-voided.nii.gz")  // Not available in validation dataset
 
         results = (
             calculate_metrics(
-                pred=os.path.join(PRED_DIR, pred),
+                pred=os.path.join(pred_dir, pred),
                 healthy_mask=mask,
                 ref_t1n=gold,
             )
@@ -92,11 +93,21 @@ def score(pred_lst, label):
 def main():
     """Main function."""
     args = get_args()
-    preds = utils.inspect_archive(args.predictions_file, path=PRED_DIR)
-    utils.inspect_archive(args.goldstandard_file, path=GOLD_DIR, pattern="t1n")
-    utils.inspect_archive(args.healthy_masks_file, path=MASK_DIR)
+    with tempfile.TemporaryDirectory() as tmp_pred_dir, \
+         tempfile.TemporaryDirectory() as tmp_gold_dir, \
+         tempfile.TemporaryDirectory() as tmp_mask_dir:
 
-    results = score(preds, args.label)
+        preds = utils.inspect_archive(args.predictions_file, path=tmp_pred_dir)
+        utils.inspect_archive(args.goldstandard_file, path=tmp_gold_dir, pattern="t1n")
+        utils.inspect_archive(args.healthy_masks_file, path=tmp_mask_dir)
+
+        results = score(
+            preds, args.label,
+            pred_dir=tmp_pred_dir,
+            gold_dir=tmp_gold_dir,
+            mask_dir=tmp_mask_dir,
+        )
+
     cases_evaluated = len(results.index)
 
     metrics = (
