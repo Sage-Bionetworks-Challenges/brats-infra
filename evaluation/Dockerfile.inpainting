@@ -1,10 +1,6 @@
 FROM pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime@sha256:417bd75df6365104c283ea4c1651fb3530d9eb5a4c2fafa51943cff2a94e6385
 
-# Temporarily change to root user in order to create
-# the .synapseCache folder required by synapseclient.
-USER 0
 RUN mkdir /.synapseCache
-USER $CONTAINER_USER_I
 
 WORKDIR /app
 

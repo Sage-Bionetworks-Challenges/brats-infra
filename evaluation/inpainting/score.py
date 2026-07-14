@@ -75,13 +75,14 @@ def score(pred_lst, label, pred_dir=PRED_DIR, gold_dir=GOLD_DIR, mask_dir=MASK_D
         identifier = f"{label}-{scan_id}"
         mask = os.path.join(mask_dir, f"{identifier}-mask-healthy.nii.gz")
         gold = os.path.join(gold_dir, f"{identifier}-t1n.nii.gz")
-        # voided = os.path.join(gold_dir, f"{identifier}-t1n-voided.nii.gz")  // Not available in validation dataset
+        voided = os.path.join(mask_dir, f"{identifier}-t1n-voided.nii.gz")
 
         results = (
             calculate_metrics(
                 pred=os.path.join(pred_dir, pred),
                 healthy_mask=mask,
                 ref_t1n=gold,
+                voided_t1n=voided,
             )
             .assign(scan_id=identifier)
             .set_index("scan_id")
