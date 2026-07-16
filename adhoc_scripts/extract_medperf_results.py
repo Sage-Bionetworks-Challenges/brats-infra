@@ -35,7 +35,7 @@ def run_medperf(result_id, output_filename="tmp.json"):
         "--format=json",
         f"--output={output_filename}",
     ]
-    subprocess.run(cmd)
+    subprocess.check_call(cmd)
 
 
 def _extract_global_synthesis_results():
