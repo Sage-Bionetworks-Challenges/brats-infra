@@ -68,7 +68,6 @@ def validate_file_format(preds, parent):
     """Check that all files are NIfTI files (*.nii.gz)."""
     error = []
     if all(pred.endswith(".nii.gz") for pred in preds):
-
         # Ensure that all file contents are NIfTI with correct params.
         if not all((res := check_file_contents(pred, parent)) == "" for pred in preds):
             error = [res]
@@ -122,7 +121,7 @@ def main():
     else:
         preds = utils.inspect_archive(args.predictions_file, path=args.tmp_dir)
         golds = utils.inspect_archive(
-            args.goldstandard_file, extract=False, path=args.tmp_dir
+            args.goldstandard_file, extract=False, pattern="mask-healthy"
         )
         if preds:
             invalid_reasons.extend(validate_file_format(preds, args.tmp_dir))

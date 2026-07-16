@@ -2,3 +2,6 @@ inpainting==0.0.8
 torchmetrics==1.7.4
 pandas==2.3.1
 synapseclient==4.9.0
+protobuf>=5.29.6
+setuptools>=78.1.1
+urllib3>=2.7.0

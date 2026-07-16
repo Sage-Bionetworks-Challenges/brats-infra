@@ -1,4 +1,4 @@
-FROM ghcr.io/mlcommons/gandlf:master-cpu
+FROM ghcr.io/mlcommons/gandlf:master-cpu@sha256:c8cef7f78d3453536ca93d1dfeb7f5432ccd9f5cb03094f9d0c179487d0cd3d1
 
 WORKDIR /usr/local/bin/
 

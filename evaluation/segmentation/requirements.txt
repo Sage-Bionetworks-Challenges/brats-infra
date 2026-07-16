@@ -1,3 +1,5 @@
 BraTS_evaluation==0.0.8
 pandas
 synapseclient
+setuptools>=78.1.1
+urllib3>=2.7.0

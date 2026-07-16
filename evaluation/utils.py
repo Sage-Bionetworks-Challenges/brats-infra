@@ -1,6 +1,8 @@
 """Shared utility functions for BraTS evaluation scripts."""
 
 import os
+import stat
+import sys
 import tarfile
 import zipfile
 
@@ -12,11 +14,17 @@ def _is_hidden(member: str) -> bool:
 
 
 def _filter_archive_members(members, pattern, is_zip):
-    """Filter out directories and hidden files from archive members."""
+    """Filter out directories, symlinks, and hidden files from archive members."""
     files_to_extract = []
     for member in members:
         member_name = member.filename if is_zip else member.name
-        is_file = not member.is_dir() if is_zip else member.isfile()
+        if is_zip:
+            is_file = (
+                not member.is_dir()
+                and not stat.S_ISLNK(member.external_attr >> 16)
+            )
+        else:
+            is_file = member.isfile()
         if is_file and not _is_hidden(member_name) and pattern in member_name:
             if is_zip:
                 member.filename = os.path.basename(member.filename)
@@ -44,6 +52,9 @@ def inspect_archive(f, extract=True, path=".", pattern=""):
         with tarfile.open(f) as tf:
             members = _filter_archive_members(tf, pattern=pattern, is_zip=False)
             if extract:
-                tf.extractall(path=path, members=members)
+                if sys.version_info >= (3, 12):
+                    tf.extractall(path=path, members=members, filter="data")
+                else:
+                    tf.extractall(path=path, members=members)
             imgs = [m.name for m in members]
     return imgs
