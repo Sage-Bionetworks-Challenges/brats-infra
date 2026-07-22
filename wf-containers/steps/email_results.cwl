@@ -41,15 +41,15 @@ requirements:
           message.append(args.submission_errors)
         else:
           message.append(
-            f"Your submission (ID {args.submissionid}) is not a Docker image. "
+            f"Your submission (ID {args.submissionid}) is not a valid Docker submission. "
             "Please try again."
           )
       else:
         subject += "accepted"
         message.append(
           "Thank you for participating in the BraTS 2026 Challenge!\n\n"
-          "This email is to notify you that we have received your Docker image for "
-          f"final evaluation (submission ID {args.submissionid}).\n\n"
+          "This email is to notify you that we have received your Docker submission "
+          f"for final evaluation (submission ID {args.submissionid}).\n\n"
           "<b>Important!: we did not run your submitted Docker model to verify "
           "that it can run successfully</b>. Therefore, we highly encourage you to "
           "<a href='https://challenges.synapse.org/Challenges/DetailsPage/News?id=syn74274097'>"
