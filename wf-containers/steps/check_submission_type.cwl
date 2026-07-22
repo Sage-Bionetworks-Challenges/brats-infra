@@ -24,7 +24,11 @@ requirements:
       syn.login()
 
       sub = syn.getSubmission(args.submissionid, downloadFile=False)
-      status = "ACCEPTED" if isinstance(sub.entity, synapseclient.entity.DockerRepository) else "INVALID"
+      if sub.evaluationId in ('9619671', '9619632'):
+        expected_type = synapseclient.entity.File
+      else:
+        expected_type = synapseclient.entity.DockerRepository
+      status = "ACCEPTED" if isinstance(sub.entity, expected_type) else "INVALID"
       results =   {
         "submission_status": status
       }
