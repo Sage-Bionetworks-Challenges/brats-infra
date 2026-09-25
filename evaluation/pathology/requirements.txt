@@ -2,3 +2,4 @@ cnb-tools==0.5.1
 pandas
 nibabel==5.0.1
 synapseclient==4.2.0
+setuptools>=78.1.1
